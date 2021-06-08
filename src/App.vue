@@ -233,6 +233,12 @@ export default {
         getLast(n,r){
             return this.network[n].row[r].last
         },
+        getSymbol(n,r,b){
+            return this.network[n].row[r].box[b].symbol
+        },
+        setSymbol(n,r,b, symbol){
+            this.network[n].row[r].box[b].symbol = symbol
+        },
         // setLast(n,r,last){
         //     this.network[n].row[r].last = last
         // },
@@ -287,7 +293,7 @@ export default {
             if(force || (this.getLast(n,r) < b && !this.isReplaceable(n,r,b)))
                 this.network[n].row[r].last = b
         },
-        putSymbolV2(symbol, n=this.selected.n, r=this.selected.r, b=this.selected.b){
+        putSymbol(symbol, n=this.selected.n, r=this.selected.r, b=this.selected.b){
 
             // Cierra todas las pestañas
             this.menu.contact = this.menu.coil = this.menu.blocks = false
@@ -361,85 +367,6 @@ export default {
             else if(!/.*(top|bottom).*/.test(this.getClass(n,r,b)) && this.getClass(n,r,b+1)==""){
                 this.setFinal(n,r,null)
                 this.setClass(n,r,b+1,"simbolo-continuar")
-                this.select(n,r,b+1)   
-            }
-
-        },
-
-        putSymbol(symbol, n=this.selected.n, r=this.selected.r, b=this.selected.b){
-
-            symbol = "simbolo-" + symbol
-
-            // Cierra todas las pestañas
-            this.menu.contact = this.menu.coil = this.menu.blocks = false
-
-            // Si es una fila auxiliar agrega una fila.
-            if(r == -1){
-                this.addRow(n)
-                r = this.getRowsTot(n)-1
-            }
-            
-            var actualSymbol = this.getClass(n,r,b)
-            //Retornar si el simbolo ya está agregado
-            if(actualSymbol.includes(symbol))
-                return
-
-            var final = this.getFinal(n,r)
-            // Retornar si se intenta poner un final antes que otro
-            if(this.isFinal(symbol) && final && final != b)
-                return
-
-            if(symbol == "simbolo-bottom"){
-                this.putBottom(n,r,b)
-                return
-            }
-            if(symbol == "simbolo-top"){
-                this.putTop(n,r,b)
-                return
-            }
-            if(symbol == "simbolo-ton"){
-                this.putTon(n,r,b)
-                return
-            }
-    
-            // Completa la primer linea
-            if(r==0){
-                for(var i = b-1; i>=0; i--){
-                    if(this.isContinue(n,r,i) || this.getClass(n,r,i) == "")
-                        this.setClass(n,r,i,"symbol-line")
-                    else
-                        break
-                }
-            }
-
-            //Setea el simbolo
-            this.setClass(n,r,b,symbol)
-            if(this.getLast(n,r) < b && !this.isReplaceable(n,r,b))
-                this.setLast(n,r,b)
-
-            //Si el simbolo anterior tenía un top o un bottom, se lo agrega
-            if(actualSymbol.includes("simbolo-top"))
-                this.addClass(n,r,b,"simbolo-top")
-            if(actualSymbol.includes("simbolo-bottom"))
-                this.addClass(n,r,b,"simbolo-bottom")
-            
-            // Agrega o quita un input superior
-            if(/.*simbolo-(reset|set|bobina|ctu|cnc|cna|ton).*/.test(symbol)){
-                    this.setInput(n,r,b,true)
-                    this.setInputClass(n,r,b,"top-input")
-            }
-            else{
-                this.setInput(n,r,b,false)
-                this.setData(n,r,b,"???")
-            }
-                
-
-            // Determina el final o agrega un simbolo-continuar
-            if(this.isFinal(symbol))
-                this.setFinal(n,r,b)
-            else if(!/.*(top|bottom).*/.test(this.getClass(n,r,b)) && this.getClass(n,r,b+1)==""){
-                this.setFinal(n,r,null)
-                this.setClass(n,r,b+1,"symbol-continue")
                 this.select(n,r,b+1)   
             }
 

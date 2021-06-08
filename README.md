@@ -1,24 +1,6 @@
-# ladder
+# Ladder
 
-## Project setup
-```
-npm install
-```
+## Description
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+Ladder programming and PLC simulation project, similar to MicroWin STEP7 of the Siemens S7-200 PLC branch, for students of Technical School "Ing. Otto Krause"
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

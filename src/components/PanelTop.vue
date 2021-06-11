@@ -1,47 +1,76 @@
 <template>
     <div class="panel-top">
-                <button @click="putSymbol('top')" :disabled="selected.r==0||canPut"><span class="iconl-arrow-top"></span></button>
-                <button @click="putSymbol('bottom')" :disabled="canPut"><span class="iconl-arrow-bottom"></span></button>
-                <button @click="putSymbol('linea')" :disabled="canPut"><span class="iconl-arrow-rigth"></span></button>
+                <button @click="putSymbol('top', 'connect')" :disabled="!canPutTop||!canPut"><span class="iconl-arrow-top"></span></button>
+                <button @click="putSymbol('bottom', 'connect')" :disabled="!canPut"><span class="iconl-arrow-bottom"></span></button>
+                <button @click="putSymbol('line', 'connect')" :disabled="!canPut"><span class="iconl-arrow-rigth"></span></button>
                 <div class="contact">
-                    <button @click="menu.contact = !menu.contact" :disabled="canPut"><span class="iconl-contact"></span></button>
+                    <button @click="menu.contact = !menu.contact" :disabled="!canPut"><span class="iconl-contact"></span></button>
                     <ul v-show="menu.contact">
-                        <li @click="putSymbol('cna')">NO</li>
-                        <li @click="putSymbol('cnc')">NC</li>
-                        <li @click="putSymbol('n')">N</li>
-                        <li @click="putSymbol('p')">P</li>
+                        <li @click="putSymbol('cno','contact')">NO</li>
+                        <li @click="putSymbol('cnc','contact')">NC</li>
+                        <li @click="putSymbol('n','contact')">N</li>
+                        <li @click="putSymbol('p','contact')">P</li>
                     </ul>
                 </div>
                 <div class="coil">
-                <button @click="menu.coil = !menu.coil" :disabled="selected.b==0||canPut"><span class="iconl-coil" ></span></button>
+                <button @click="menu.coil = !menu.coil" :disabled="!canPut||!canPutFinal"><span class="iconl-coil" ></span></button>
                     <ul v-show="menu.coil">
-                        <li @click="putSymbol('bobina')">-( )</li>
-                        <li @click="putSymbol('reset')">R</li>
-                        <li @click="putSymbol('set')">S</li>
+                        <li @click="putSymbol('coil','coil')">-( )</li>
+                        <li @click="putSymbol('reset','coil')">R</li>
+                        <li @click="putSymbol('set','coil')">S</li>
                     </ul>
                 </div>
                 <div class="blocks">
-                    <button @click="menu.blocks = !menu.blocks" :disabled="selected.b==0||canPut"><span class="iconl-blocks"></span></button>
+                    <button @click="menu.blocks = !menu.blocks" :disabled="!canPut||!canPutFinal"><span class="iconl-blocks"></span></button>
                     <ul v-show="menu.blocks">
-                        <li @click="putSymbol('ton')">TON</li>
-                        <li @click="putSymbol('ctu')">CTU</li>
+                        <li @click="putSymbol('ton', 'block')">TON</li>
+                        <li @click="putSymbol('ctu', 'block')">CTU</li>
                     </ul>
                 </div>
     <button @click="deleteSymbol"><span class="material-icons trash">delete</span></button>
     </div>
 </template>
 <script>
-import { computed } from '@vue/runtime-core'
+import { computed, reactive } from '@vue/runtime-core'
 import {useStore} from "vuex"
 export default {
     setup() {
         const store = useStore()
-        const putSymbol = (symbol) => {
-            store.dispatch("putSymbol",symbol)
+        const menu = reactive({
+            contact: false,
+            coil: false,
+            blocks: false,
+        })
+        const closeMenu = () => menu.contact = menu.coil = menu.blocks = false
+        
+        const putSymbol = (symbol, type) => {
+            closeMenu() 
+            store.dispatch("putSymbol", {symbol, type})
         }
-        const menu = computed(() => store.state.menu)
+        const deleteSymbol = () => {
+            store.dispatch("deleteSymbol")
+        }
         const selected = computed(() => store.state.selected)
-        return{putSymbol, menu, selected}
+
+        const canPut = computed(() => {
+            return store.getters.selectedFinal ? (store.state.selected.b <= store.getters.selectedFinal) : true
+        })
+        const canPutFinal = computed(() => {
+            return store.state.selected.b > 0 ? (store.getters.selectedLast ? (store.state.selected.b >= store.getters.selectedLast) : true) : false
+        })
+        const canPutTop = computed(() => {
+            var r = store.state.selected.r
+            if(store.state.selected.r == -1) 
+                r = store.state.network[store.state.selected.n].row.length
+            if(r > 0){
+                const final = store.getters.row({property: "final", n: store.state.selected.n, r: r-1})
+                return final ? (store.state.selected.b < final) : true 
+            }
+            else
+                return false
+        })
+
+        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop}
     },
 }
 </script>

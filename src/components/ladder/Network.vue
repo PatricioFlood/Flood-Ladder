@@ -6,7 +6,7 @@
         </div>
         <div class="aux-row">
             <div class="aux-box" v-for="(i,ab) in auxRow.length" :key="ab"
-            @click="select(n,ab)" 
+            @click="selectAux(n,ab)" 
             :class="{'selected' : auxRow[ab].selected}"></div>
         </div>
     </div>
@@ -19,10 +19,10 @@ export default{
     components: {Box},
     setup(){
         const store = useStore()
-        const select = (n,ab) => {
-            store.dispatch("auxSelect",n,ab)
+        const selectAux = (n,ab) => {
+            store.dispatch("select", {n, ab})
         }
-        return{select}
+        return{selectAux}
     }
 }
 </script>
@@ -54,5 +54,13 @@ export default{
                     height: 25px;
                     flex-shrink: 0;
                     cursor: pointer;
+                }
+                .aux-box:hover{
+                    outline: 1px solid rgb(226, 226, 226);
+                    outline-offset: -1px;
+                }
+                .aux-box.selected{
+                    outline: 1px solid black;
+                    outline-offset: -1px;
                 }
 </style>

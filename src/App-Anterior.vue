@@ -218,9 +218,6 @@ export default {
         setInput(n,r,b,input){
             this.network[n].row[r].box[b].input = input
         },
-        setInputClass(n,r,b,inputClass){
-            this.network[n].row[r].box[b].inputClass = inputClass
-        },
         setData(n,r,b,data){
             this.network[n].row[r].box[b].data = data
         },

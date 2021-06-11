@@ -1,23 +1,24 @@
 <template>
-    <div class="box" @click="select" :class="[{'selected' : box.selected}, box.class]">
+    <div class="box" @click="selectBox" :class="[{'selected' : box.selected}, box.cssClass]">
         <input type="text" v-model="boxInput" v-if="box.input" 
-        :class="box.inputClass">
+        :class="[box.inputClass, {'symbol-top' : box.connection.top}, {'symbol-bottom' : box.connection.bottom}]">
         <div class="block-data1">{{box.blockData1}}</div>
         <div class="block-data2">{{box.blockData2}}</div>
         <div class="box-background"></div>
     </div>
 </template>
 <script>
-import useStore from "vuex"
+import {useStore} from "vuex"
+
 export default {
-    props: {n: Number, r: Number, b: Number, box: Array},
+    props: {n: Number, r: Number, b: Number, box: Object},
     setup(props){
         const store = useStore()
-        const boxInput = null
-        const select = () => {
-            store.dispatch("boxSelect", {n: props.n, r: props.r, b: props.b})
+        const boxInput = "???"
+        const selectBox = () => {
+            store.dispatch("select", {n: props.n, r: props.r, b: props.b})
         }
-        return {boxInput,select}
+        return {boxInput,selectBox}
     }
 }
 </script>
@@ -32,25 +33,36 @@ export default {
     flex-direction: column;
     overflow: hidden;
 }
-    .top-input, .center-input{
+    input{
         width: 100%;
         text-align: center;
-        background-color: rgba(255, 255, 255, 0);
+        background: none;
         border: none;
         font-weight: 400;
         font-size: 15px;
         height: 20px;
-        position: relative;
+        position: absolute;
         top: -1px;
         color: rgb(24, 24, 24);
     }
-    .top-input:focus, .center-input:focus{
+    input:focus, input:focus{
         outline: none;
     }
     .center-input{
         top: 19px;
         padding-right: 2px;
         text-align: right;
+    }
+    .block-data1{
+        width: 100%;
+        text-align: center;
+        border: none;
+        font-weight: 400;
+        font-size: 15px;
+        height: 20px;
+        position: absolute;
+        top: 20px;
+        color: rgb(24, 24, 24);
     }
     .box-background{
         width: 100%;
@@ -64,11 +76,11 @@ export default {
         background-repeat: no-repeat,no-repeat;
         background-origin: border-box;
     }
-    .box:hover,.aux-box:hover{
+    .box:hover{
         outline: 1px solid rgb(226, 226, 226);
         outline-offset: -1px;
     }
-    .box.selected, .aux-box.selected{
+    .box.selected{
         outline: 1px solid black;
         outline-offset: -1px;
     }
@@ -83,9 +95,9 @@ export default {
         --position-y-two:-98px;
     }
     .symbol-coil .box-background{
-        --position-y-two:-136px;
+        --position-y-two:-138px;
     }
-    .sybol-contact .box-background{
+    .symbol-contact .box-background{
         --position-y-two:-178px;
     }
     .symbol-continue .box-background{

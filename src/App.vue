@@ -5,7 +5,7 @@
             <panel-top />
             <ladder />
         </div>
-        <div class="panel-rigth"></div>
+        <!-- <div class="panel-rigth"></div> -->
     </div>
 </template>
 <script>

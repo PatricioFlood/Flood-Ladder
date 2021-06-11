@@ -2,7 +2,7 @@
     <div class="ladder">
         <div class="spreader-bar"></div>
         <div class="networks">
-            <network v-for="(i,n) in networksTot" :key="n" :n="n" :row="network[n].row" :auxRow="network[n].auxRow" />
+            <network v-for="(i,n) in network.length" :key="n" :n="n" :row="network[n].row" :auxRow="network[n].auxRow" />
         </div>
     </div>
 </template>

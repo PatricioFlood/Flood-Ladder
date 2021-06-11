@@ -71,6 +71,7 @@ export default {
             else
                 return false
         })
+        
         const canDelete = computed(() => {
             var symbol = store.getters.box({property: "symbol"})
             return (selected.value.r != -1 && symbol != "center-input" && symbol != "start" && symbol != "continue")

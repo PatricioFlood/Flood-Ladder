@@ -1,5 +1,11 @@
 export default{
     box: (state) => ({property, n, r, b}) => {
+        if(n == undefined){
+            if(state.selected.r > -1)
+                return state.network[state.selected.n].row[state.selected.r].box[state.selected.b][property]
+            else
+                return ""
+        }
         return state.network[n].row[r].box[b][property]
     },
     row: (state) => ({property, n, r}) => {

@@ -53,18 +53,20 @@ export default {
         const selected = computed(() => store.state.selected)
 
         const canPut = computed(() => {
-            return store.getters.selectedFinal ? (store.state.selected.b <= store.getters.selectedFinal) : true
+            if(store.getters.box({property: "symbol"}) == "center-input")
+                return false
+            return store.getters.selectedFinal !== null ? (selected.value.b <= store.getters.selectedFinal) : true
         })
         const canPutFinal = computed(() => {
-            return store.state.selected.b > 0 ? (store.getters.selectedLast ? (store.state.selected.b >= store.getters.selectedLast) : true) : false
+            return selected.value.b > 0 ? (store.getters.selectedLast ? (selected.value.b >= store.getters.selectedLast) : true) : false
         })
         const canPutTop = computed(() => {
-            var r = store.state.selected.r
-            if(store.state.selected.r == -1) 
-                r = store.state.network[store.state.selected.n].row.length
+            var r = selected.value.r
+            if(r == -1) 
+                r = store.state.network[selected.value.n].row.length
             if(r > 0){
-                const final = store.getters.row({property: "final", n: store.state.selected.n, r: r-1})
-                return final ? (store.state.selected.b < final) : true 
+                const final = store.getters.row({property: "final", n: selected.value.n, r: r-1})
+                return final ? (selected.value.b < final) : true 
             }
             else
                 return false

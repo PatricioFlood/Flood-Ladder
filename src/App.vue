@@ -5,7 +5,6 @@
             <panel-top />
             <ladder />
         </div>
-        <!-- <div class="panel-rigth"></div> -->
     </div>
 </template>
 <script>
@@ -20,8 +19,12 @@ export default {
         store.dispatch("initialize")
 
         //VH para CSS
-        const vh = window.innerHeight;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
+        const setVH = () => {
+            const vh = window.innerHeight;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        setVH()
+        window.addEventListener("resize", setVH)
     }
 }
 </script>

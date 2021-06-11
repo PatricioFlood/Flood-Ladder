@@ -12,11 +12,11 @@ export default{
 
         var actualNetwork = state.network.length-1
 
-        dispatch("addRow", actualNetwork)
+        dispatch("addRow", {n: actualNetwork})
         commit("addAuxRow", actualNetwork)
     },
 
-    addRow({commit,state,dispatch}, n){
+    addRow({commit,state,dispatch,getters}, {n, r}){
 
         commit("addEmptyRow", n)
         
@@ -30,24 +30,24 @@ export default{
         }
        
         
-
-        // if(!row){
-        //   console.log("no hay row")
-        // }
-        // if(row==undefined){
-        //     if(state.selected.r == row)
-        //         this.network[this.selected.n].row[this.selected.r].box[this.selected.b].selected = false
+        if(r != undefined){
+            if(state.selected.r == r)
+            commit("setBox",{property: "selected", value: false, n: state.selected.n, r: state.selected.r, b: state.selected.b})
                 
-        //     var whiteRow = this.network[n].row[actualRow]
-        //     for(i = actualRow; i>row; i--){
-        //         this.network[n].row.splice(i,1,this.network[n].row[i-1])
-        //     }
-        //     this.network[n].row.splice(row,1,whiteRow)
+            var whiteRow = state.network[n].row[actualRow]
+            for(i = actualRow; i>r; i--){
+                commit("replaceRow", {n, r: i, row: state.netwrok[n].row[i-1]})
+            }
+            commit("replaceRow", {n, r, row: whiteRow})
 
-        //     for(i = 0; i<this.network[n].row[row].boxs.length; i++){
-        //         if(this.getClass(n,row+1,i).includes("top"))
-        //             this.setClass(n,row,i,"simbolo-top simbolo-bottom")
-        //     }
+            for(i = 0; i<state.network[n].row[r].boxs.length; i++){
+                if(getters.connection({pos: "top", n, r: r+1, b: i})){
+                    dispatch("putTop", {n, r, b: i})
+                    dispatch("putBottom", {n, r, b: i})
+                } 
+            }
+        }
+
     },
 
     select({state, commit}, {n, r, b, ab}){
@@ -73,15 +73,17 @@ export default{
 
     putBottom({state,dispatch,getters}, {n, r, b}){
         if(state.network[n].row.length == r+1) //Si la fila de abajo es una fila auxiliar agrega una fila real
-            dispatch("addRow", n)
+            dispatch("addRow", {n})
         
         dispatch("resetConnection", {add: true, pos: "bottom", n, r, b})
 
         if((b==0 || getters.box({property: "symbol", n, r: r+1, b}) == "") && getters.box({property: "symbol", n, r: r+1, b: b+1}) == "")
             dispatch("setSymbol", {symbol: "continue", type: "connect", n, r: r+1, b: b+1})
 
-        if(isReplaceable(getters.box({property: "symbol", n, r, b})))
+        if(isReplaceable(getters.box({property: "symbol", n, r, b})) && !getters.connection({pos:"top", n, r, b}))
             dispatch("putSymbol", {symbol: "line", type: "connect", n, r, b})
+        
+            
 
         dispatch("select", {n, r: r+1, b: b+1})
     },
@@ -95,30 +97,34 @@ export default{
         if((b==0 || getters.box({property: "symbol", n, r: r-1, b}) == "") && getters.box({property: "symbol", n, r: r-1, b: b+1}) == "")
             dispatch("setSymbol", {symbol: "continue", type: "connect", n, r: r-1, b: b+1})
             
-        if(isReplaceable(getters.box({property: "symbol", n, r, b})))
+        if(isReplaceable(getters.box({property: "symbol", n, r, b})) && !getters.connection({pos:"bottom", n, r, b}))
             dispatch("putSymbol", {symbol: "line", type: "connect", n, r, b})
 
         dispatch("select", {n, r: r-1, b: b+1}) 
     },
 
-    putTon(n,r,b){
-        var rowsTot = this.network[n].rowsTot;
-        if(r==rowsTot-1){
-            this.addRow(n)
-        } else if(this.getClass(n,r+1,b)!="" || this.getClass(n,r+1,b+1)!=""){
-                this.addRow(n,r+1)
-        }
-        this.setClass(n,r,b,"simbolo-ton")
-        this.setInput(n,r,b,true)
-        this.setInputClass(n,r,b,"top-input")
-        this.setBlockData1(n,r,b,"100")
+    putTon({state, getters, commit, dispatch},{n,r,b}){
+        var rowsTot = state.network[n].row.length;
+        if(r == rowsTot-1)
+           dispatch("addRow", {n})
+        else if(getters.box({property: "symbol", n, r: r+1, b}) != "" || getters.box({property: "symbol", n, r: r+1, b: b+1}) != "")
+            dispatch("addRow", {n, r: r+1})
+        
+        dispatch("putSymbol", {symbol: "ton-top", type:"block", n, r, b})
+        // this.setInput(n,r,b,true)
+        // this.setInputClass(n,r,b,"top-input")
+        // this.setBlockData1(n,r,b,"100")
+        dispatch("setSymbol", {symbol: "ton-bottom", type:"block", n, r: r+1, b})
 
-        this.setClass(n,r+1,b-1,"pt-input")
-        this.setInput(n,r+1,b-1,true)
-        this.setInputClass(n,r+1,b-1,"center-input")
+        dispatch("setSymbol", {symbol: "center-input", type:"block", n, r: r+1, b: b-1})
 
-        this.setFinal(n,r,b)
-        this.setFinal(n,r+1,b)
+        // this.setClass(n,r+1,b-1,"pt-input")
+        // this.setInput(n,r+1,b-1,true)
+        // this.setInputClass(n,r+1,b-1,"center-input")
+
+        commit("setRow", {property: "final", value: b, n, r})
+        commit("setRow", {property: "final", value: b-1, n, r: r+1})
+       
     },
 
     setLast({getters, commit}, {n, r, b, force=false}){
@@ -186,6 +192,25 @@ export default{
                         break
                 }
                 break
+            case "block":
+                switch(symbol){
+                    case "ton-top":
+                        cssClass = "symbol-block-top"
+                        blockData1 = "IN"
+                        blockData2 = "TON"
+                        input = true
+                        break
+                    case "ton-bottom":
+                        blockData1 = "PT"
+                        blockData2 = "??? ms"
+                        cssClass = "symbol-block-bottom"
+                        break
+                    case "center-input":
+                        input = true
+                        cssClass = "center-input"
+                        break
+                }
+                break
         }
         commit("setBox", {property: "cssClass", value: cssClass, n, r, b})
         commit("setBox", {property: "blockData1", value: blockData1, n, r, b})
@@ -211,7 +236,7 @@ export default{
 
         // Si es una fila auxiliar agrega una fila.
         if(r == -1){
-            dispatch("addRow", n)
+            dispatch("addRow", {n})
             r = state.network[n].row.length-1
         }
 
@@ -318,11 +343,11 @@ export default{
 }
 
 const isFinal = (symbol) => {
-    return /coil|reset|set|ton|ctu/.test(symbol)
+    return /coil|reset|set|ton-top|ctu-top/.test(symbol)
 }
 
 const isReplaceable = (symbol) => {
-    return /(continue|start|line)?/.test(symbol)
+    return /continue|start|line/.test(symbol)
 }
 
 const isContinue = (symbol) => {

@@ -1,8 +1,8 @@
 <template>
     <div class="box" @click="selectBox" :class="[{'selected' : box.selected}, box.cssClass, {'symbol-top' : box.connection.top}, {'symbol-bottom' : box.connection.bottom}]">
         <input type="text" v-model="boxInput" v-if="box.input">
-        <div class="block-data1">{{box.blockData1}}</div>
-        <div class="block-data2">{{box.blockData2}}</div>
+        <div class="block-data1" v-show="box.blockData1">{{box.blockData1}}</div>
+        <div class="block-data2" v-show="box.blockData2">{{box.blockData2}}</div>
         <div class="box-background"></div>
     </div>
 </template>
@@ -47,12 +47,7 @@ export default {
     input:focus, input:focus{
         outline: none;
     }
-    .center-input{
-        top: 19px;
-        padding-right: 2px;
-        text-align: right;
-    }
-    .block-data1{
+    .block-data1, .block-data2{
         width: 100%;
         text-align: center;
         border: none;
@@ -121,5 +116,42 @@ export default {
     }
     .symbol-vertical .box-background{
         background-position-x: 98px, 0;
+    }
+    .symbol-block-top{
+        height: 120px;
+        z-index: 1
+    }
+    .symbol-block-top .block-data1{
+        text-align: left;
+        top: 23px;
+        left: 8px;
+    }
+    .symbol-block-top .block-data2{
+        text-align: right;
+        right: 8px;
+        top: 23px;
+    }
+    .symbol-block-bottom .block-data1{
+        text-align: left;
+        left: 8px;
+        top: 18px;
+    }
+    .symbol-block-bottom .block-data2{
+        width: 100%;
+        text-align: right;
+        border: none;
+        font-weight: 400;
+        font-size: 15px;
+        height: 20px;
+        right: 8px;
+        position: absolute;
+        top: 18px;
+        color: rgb(24, 24, 24);
+    }
+    .center-input input{
+        top: -2px;
+        text-align: right;
+        padding-right: 3px;
+        height: 60px
     }
 </style>

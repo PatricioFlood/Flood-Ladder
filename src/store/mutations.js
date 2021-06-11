@@ -13,6 +13,9 @@ export default{
             box: []
     })
     },
+    replaceRow(state, {n,r,row}){
+        state.network[n].row.splice(r,1,row)
+    },
     deleteRow(state, {n,r}){
         var rowsTot = state.network[n].row.length
 

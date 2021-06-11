@@ -27,7 +27,7 @@
                         <li @click="putSymbol('ctu', 'block')">CTU</li>
                     </ul>
                 </div>
-    <button @click="deleteSymbol"><span class="material-icons trash">delete</span></button>
+    <button @click="deleteSymbol" :disabled="!canDelete"><span class="material-icons trash">delete</span></button>
     </div>
 </template>
 <script>
@@ -71,8 +71,12 @@ export default {
             else
                 return false
         })
+        const canDelete = computed(() => {
+            var symbol = store.getters.box({property: "symbol"})
+            return (selected.value.r != -1 && symbol != "center-input" && symbol != "start" && symbol != "continue")
+        })
 
-        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop}
+        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete}
     },
 }
 </script>

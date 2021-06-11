@@ -13,6 +13,18 @@ export default{
             box: []
     })
     },
+    deleteRow(state, {n,r}){
+        var rowsTot = state.network[n].row.length
+
+        if(r == undefined)
+            r = rowsTot-1
+        
+        for(var i = r; i<rowsTot-1; i++){
+            state.network[n].row.splice(i,1,state.network[n].row[i+1])
+        }
+        state.network[n].row.pop()
+        return 
+    },
     addAuxRow(state, n){
         for(var i = 0; i<10; i++){
             state.network[n].auxRow.push({
@@ -60,11 +72,11 @@ export default{
         if(all != undefined)
             bottom = top = right = all
         if(top != undefined)
-            state.network[n].row[r].box[b].conecction.top = top
+            state.network[n].row[r].box[b].connection.top = top
         if(right != undefined)
-            state.network[n].row[r].box[b].conecction.right = right
+            state.network[n].row[r].box[b].connection.right = right
         if(bottom != undefined)
-            state.network[n].row[r].box[b].conecction.top = bottom
+            state.network[n].row[r].box[b].connection.bottom = bottom
     },
     
 }

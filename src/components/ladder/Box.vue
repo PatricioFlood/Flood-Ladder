@@ -1,7 +1,6 @@
 <template>
-    <div class="box" @click="selectBox" :class="[{'selected' : box.selected}, box.cssClass]">
-        <input type="text" v-model="boxInput" v-if="box.input" 
-        :class="[box.inputClass, {'symbol-top' : box.connection.top}, {'symbol-bottom' : box.connection.bottom}]">
+    <div class="box" @click="selectBox" :class="[{'selected' : box.selected}, box.cssClass, {'symbol-top' : box.connection.top}, {'symbol-bottom' : box.connection.bottom}]">
+        <input type="text" v-model="boxInput" v-if="box.input">
         <div class="block-data1">{{box.blockData1}}</div>
         <div class="block-data2">{{box.blockData2}}</div>
         <div class="box-background"></div>
@@ -113,7 +112,7 @@ export default {
         background-position-x: 98px, 0;
         --position-y-one: 30px;
     }
-    .siymbol-top .box-background{
+    .symbol-top .box-background{
         background-position-x: 98px, 0;
         --position-y-one: -29px;
     }

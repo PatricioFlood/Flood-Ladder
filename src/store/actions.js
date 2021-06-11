@@ -16,7 +16,7 @@ export default{
         commit("addAuxRow", actualNetwork)
     },
 
-    addRow({commit,state}, n){
+    addRow({commit,state,dispatch}, n){
 
         commit("addEmptyRow", n)
         
@@ -25,8 +25,11 @@ export default{
         for(var i = 0; i<10; i++){
             commit("addEmptyBox", {n: n, r: actualRow})
         }
-        commit("setBox", {property: "symbol", value: "start", n, r: 0, b: 0})
-        commit("setBox", {property: "cssClass", value: "symbol-start", n, r: 0, b: 0})
+        if(actualRow == 0){
+            dispatch("setSymbol", {symbol: "start", type: "connect", n, r: 0, b: 0})
+        }
+       
+        
 
         // if(!row){
         //   console.log("no hay row")
@@ -68,33 +71,34 @@ export default{
             
     },
 
-    putBottom({getters},n,r,b){
-        if(this.getRowsTot(n)==r+1) //Si la fila de abajo es una fila auxiliar agrega una fila real
-            this.addRow(n)
+    putBottom({state,dispatch,getters}, {n, r, b}){
+        if(state.network[n].row.length == r+1) //Si la fila de abajo es una fila auxiliar agrega una fila real
+            dispatch("addRow", n)
         
-        this.addClass(n,r+1,b,"simbolo-top")
+        dispatch("resetConnection", {add: true, pos: "bottom", n, r, b})
 
-        if((b==0 || this.getClass(n,r+1,b-1)=="") && this.getClass(n,r+1,b+1)=="")
-            this.setClass(n,r+1,b+1,"simbolo-continuar")
+        if((b==0 || getters.box({property: "symbol", n, r: r+1, b}) == "") && getters.box({property: "symbol", n, r: r+1, b: b+1}) == "")
+            dispatch("setSymbol", {symbol: "continue", type: "connect", n, r: r+1, b: b+1})
 
-        if(this.isReplaceable(getters.box({property: "symbol", n, r, b})))
-            this.putSymbol("linea",n,r,b)
+        if(isReplaceable(getters.box({property: "symbol", n, r, b})))
+            dispatch("putSymbol", {symbol: "line", type: "connect", n, r, b})
 
-        this.addClass(n,r,b,"simbolo-bottom")
-        this.select(n,r+1,b+1)
+        dispatch("select", {n, r: r+1, b: b+1})
     },
 
-    putTop({getters},n,r,b){
-        this.addClass(n,r-1,b,"simbolo-bottom")
+    putTop({getters, dispatch}, {n,r,b}){
+        dispatch("resetConnection", {add: true, pos: "top", n, r, b})
 
-        if(this.getClass(n,r,b+1)=="simbolo-continuar")
-            this.setClass(n,r,b+1,"") 
+        if(getters.box({property: "symbol", n, r: r, b: b+1}) == "continue")
+            dispatch("resetSymbol", {n, r, b: b+1})
+
+        if((b==0 || getters.box({property: "symbol", n, r: r-1, b}) == "") && getters.box({property: "symbol", n, r: r-1, b: b+1}) == "")
+            dispatch("setSymbol", {symbol: "continue", type: "connect", n, r: r-1, b: b+1})
             
-        if(this.isReplaceable(getters.box({property: "symbol", n, r, b})))
-            this.putSymbol("linea",n,r,b)
+        if(isReplaceable(getters.box({property: "symbol", n, r, b})))
+            dispatch("putSymbol", {symbol: "line", type: "connect", n, r, b})
 
-        this.addClass(n,r,b,"simbolo-top") 
-        this.select(n,r-1,b+1)  
+        dispatch("select", {n, r: r-1, b: b+1}) 
     },
 
     putTon(n,r,b){
@@ -249,8 +253,6 @@ export default{
         if(b > getters.row({property: "last", n, r}))
             commit("setRow", {property: "last", value: b, n, r})
         
-            
-
         // Determina el final o agrega un simbolo-continuar
         if(isFinal(symbol))
             commit("setRow", {property: "final", value: b, n, r})
@@ -268,7 +270,7 @@ export default{
         const b = state.selected.b
         const symbol = getters.box({property: "symbol", n, r, b})
         const symbolBefore = b>0?getters.box({property: "symbol", n, r, b: b-1}):""
-        const connection = getters.connection("all", n, r, b)
+        const connection = getters.connection({pos: "all", n, r, b})
 
 
         if(isContinue(getters.box({property: "symbol", n, r, b})) || symbol == "pt-input")
@@ -290,11 +292,11 @@ export default{
         else
             dispatch("resetSymbol", {n, r, b})
 
-
-        if(getters.box({property: "symbol",n ,r , b:b+1}) == "simbolo-continuar")
+        // Si a la derecha tiene un continue, lo borra
+        if(getters.box({property: "symbol",n ,r , b:b+1}) == "continue")
             dispatch("resetSymbol", {n, r, b: b+1})
 
-        if(dispatch("isFinal", symbol))
+        if(isFinal(symbol))
             commit("setRow", {property: "final", value: null, n, r})
 
         if(getters.row({property: "last", n, r}) == b){
@@ -303,10 +305,15 @@ export default{
                 if(isReplaceable(symbol))
                     break
             }
-            this.setLast(n,r,i)
+            if(i == -1)
+                i = null
+            commit("setRow", {property: "last", value: i, n, r})
         }
-        if(b== 0 && r>0 && getters.row({property: "last", n, r} == -1))
+        if(b== 0 && r>0 && getters.row({property: "last", n, r}) == null){
+            dispatch("select", {n, r: r-1, b: 0})
             commit("deleteRow", {n, r})
+        }
+            
     },
 }
 

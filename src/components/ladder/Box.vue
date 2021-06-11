@@ -117,8 +117,12 @@ export default {
     .symbol-vertical .box-background{
         background-position-x: 98px, 0;
     }
-    .symbol-block-top{
+    .ton{
         height: 120px;
+        z-index: 1
+    }
+    .ctu{
+        height: 180px;
         z-index: 1
     }
     .symbol-block-top .block-data1{
@@ -131,22 +135,20 @@ export default {
         right: 8px;
         top: 23px;
     }
+    .symbol-block-middle .block-data1{
+        text-align: left;
+        left: 8px;
+        top: 18px;
+    }
     .symbol-block-bottom .block-data1{
         text-align: left;
         left: 8px;
         top: 18px;
     }
     .symbol-block-bottom .block-data2{
-        width: 100%;
         text-align: right;
-        border: none;
-        font-weight: 400;
-        font-size: 15px;
-        height: 20px;
         right: 8px;
-        position: absolute;
         top: 18px;
-        color: rgb(24, 24, 24);
     }
     .center-input input{
         top: -2px;

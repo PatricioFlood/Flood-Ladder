@@ -36,11 +36,11 @@ export default{
                 
             var whiteRow = state.network[n].row[actualRow]
             for(i = actualRow; i>r; i--){
-                commit("replaceRow", {n, r: i, row: state.netwrok[n].row[i-1]})
+                commit("replaceRow", {n, r: i, row: state.network[n].row[i-1]})
             }
             commit("replaceRow", {n, r, row: whiteRow})
 
-            for(i = 0; i<state.network[n].row[r].boxs.length; i++){
+            for(i = 0; i<state.network[n].row[r].box.length; i++){
                 if(getters.connection({pos: "top", n, r: r+1, b: i})){
                     dispatch("putTop", {n, r, b: i})
                     dispatch("putBottom", {n, r, b: i})
@@ -107,24 +107,47 @@ export default{
         var rowsTot = state.network[n].row.length;
         if(r == rowsTot-1)
            dispatch("addRow", {n})
-        else if(getters.box({property: "symbol", n, r: r+1, b}) != "" || getters.box({property: "symbol", n, r: r+1, b: b+1}) != "")
+        else if(getters.box({property: "symbol", n, r: r+1, b}) != "" || getters.box({property: "symbol", n, r: r+1, b: b+1}) != "" || getters.box({property: "symbol", n, r: r+1, b: b-1}) != "")
             dispatch("addRow", {n, r: r+1})
         
         dispatch("putSymbol", {symbol: "ton-top", type:"block", n, r, b})
-        // this.setInput(n,r,b,true)
-        // this.setInputClass(n,r,b,"top-input")
-        // this.setBlockData1(n,r,b,"100")
         dispatch("setSymbol", {symbol: "ton-bottom", type:"block", n, r: r+1, b})
-
         dispatch("setSymbol", {symbol: "center-input", type:"block", n, r: r+1, b: b-1})
 
-        // this.setClass(n,r+1,b-1,"pt-input")
-        // this.setInput(n,r+1,b-1,true)
-        // this.setInputClass(n,r+1,b-1,"center-input")
+        commit("setRow", {property: "final", value: b, n, r})
+        commit("setRow", {property: "last", value: b, n, r})
+        commit("setRow", {property: "final", value: b-1, n, r: r+1})
+        commit("setRow", {property: "last", value: b-1, n, r: r+1})
+       
+    },
+
+    putCtu({state, getters, commit, dispatch},{n,r,b}){
+        var rowsTot = state.network[n].row.length;
+        if(r == rowsTot-1){
+            dispatch("addRow", {n})
+            dispatch("addRow", {n})
+        }
+        else{
+            if(r == rowsTot-2)
+                dispatch("addRow", {n})
+            if(getters.box({property: "symbol", n, r: r+1, b}) != "" || getters.box({property: "symbol", n, r: r+1, b: b+1}) != "" || getters.box({property: "symbol", n, r: r+1, b: b-1}) != "")
+                dispatch("addRow", {n, r: r+1})
+            if(getters.box({property: "symbol", n, r: r+2, b}) != "" || getters.box({property: "symbol", n, r: r+2, b: b+1}) != "" || getters.box({property: "symbol", n, r: r+2, b: b-1}) != "")
+                dispatch("addRow", {n, r: r+2})
+        } 
+        
+        dispatch("putSymbol", {symbol: "ctu-top", type:"block", n, r, b})
+        dispatch("setSymbol", {symbol: "ctu-middle", type:"block", n, r: r+1, b})
+        dispatch("setSymbol", {symbol: "ctu-bottom", type:"block", n, r: r+2, b})
+        dispatch("setSymbol", {symbol: "center-input", type:"block", n, r: r+2, b: b-1})
+
 
         commit("setRow", {property: "final", value: b, n, r})
-        commit("setRow", {property: "final", value: b-1, n, r: r+1})
-       
+        commit("setRow", {property: "last", value: b, n, r})
+        commit("setRow", {property: "final", value: b, n, r: r+1})
+        commit("setRow", {property: "last", value: b, n, r: r+1})
+        commit("setRow", {property: "final", value: b-1, n, r: r+2})
+        commit("setRow", {property: "last", value: b-1, n, r: r+2})    
     },
 
     setLast({getters, commit}, {n, r, b, force=false}){
@@ -195,7 +218,7 @@ export default{
             case "block":
                 switch(symbol){
                     case "ton-top":
-                        cssClass = "symbol-block-top"
+                        cssClass = "symbol-block-top ton"
                         blockData1 = "IN"
                         blockData2 = "TON"
                         input = true
@@ -203,6 +226,20 @@ export default{
                     case "ton-bottom":
                         blockData1 = "PT"
                         blockData2 = "??? ms"
+                        cssClass = "symbol-block-bottom"
+                        break
+                    case "ctu-top":
+                        input = true
+                        blockData1 = "CU"
+                        blockData2 = "CTU"
+                        cssClass = "symbol-block-top ctu"
+                        break
+                    case "ctu-middle":
+                        blockData1 = "R"
+                        cssClass = "symbol-block-middle"
+                        break
+                    case "ctu-bottom":
+                        blockData1 = "PV"
                         cssClass = "symbol-block-bottom"
                         break
                     case "center-input":
@@ -245,6 +282,9 @@ export default{
         //Retornar si el simbolo ya está agregado
         if(symbol == previousSymbol)
             return
+
+        if(previousSymbol == "ton-top" || previousSymbol == "ctu-top")
+            dispatch("deleteSymbol", {n, r, b})
 
         switch(symbol){
             case "bottom":
@@ -289,20 +329,29 @@ export default{
 
     },
 
-    deleteSymbol({state, commit, dispatch, getters}){
-        const n = state.selected.n
-        const r = state.selected.r
-        const b = state.selected.b
+    deleteSymbol({state, commit, dispatch, getters}, {n, r, b} = {n: state.selected.n, r: state.selected.r, b: state.selected.b}){
+
         const symbol = getters.box({property: "symbol", n, r, b})
-        const symbolBefore = b>0?getters.box({property: "symbol", n, r, b: b-1}):""
+        const symbolBefore = b>0 ? getters.box({property: "symbol", n, r, b: b-1}) : ""
         const connection = getters.connection({pos: "all", n, r, b})
 
-
-        if(isContinue(getters.box({property: "symbol", n, r, b})) || symbol == "pt-input")
+        if(isContinue(symbol) || symbol == "center-input" || symbol == "ton-bottom")
             return
 
-        commit("setBox", {property: "input", value: "false", n, r, b})
-        commit("setBox", {property: "symbol", value: "", n, r, b})
+        if(symbol == "ton-top"){
+            commit("setBox", {property: "symbol", value: "deleteInput", n, r: r+1, b: b-1})
+            dispatch("resetSymbol", {n, r: r+1, b})
+            dispatch("deleteSymbol", {n, r: r+1, b: b-1})
+        }
+
+        if(symbol == "ctu-top"){
+            commit("setBox", {property: "symbol", value: "deleteInput", n, r: r+2, b: b-1})
+            dispatch("deleteSymbol", {n, r: r+1, b})
+            dispatch("resetSymbol", {n, r: r+2, b})
+            dispatch("deleteSymbol", {n, r: r+2, b: b-1})
+        }
+        
+        dispatch("resetSymbol", {n, r, b})
 
         if(connection.top)
             dispatch("resetConnection", {pos: "top", n, r, b})
@@ -314,9 +363,7 @@ export default{
         }
         else if(b==0 && r==0)
             dispatch("setSymbol", {symbol: "start", type: "connect", n, r, b})
-        else
-            dispatch("resetSymbol", {n, r, b})
-
+            
         // Si a la derecha tiene un continue, lo borra
         if(getters.box({property: "symbol",n ,r , b:b+1}) == "continue")
             dispatch("resetSymbol", {n, r, b: b+1})
@@ -324,6 +371,7 @@ export default{
         if(isFinal(symbol))
             commit("setRow", {property: "final", value: null, n, r})
 
+        //busca el próximo last
         if(getters.row({property: "last", n, r}) == b){
             var i = b-1
             for(i; i>=0; i--){
@@ -334,6 +382,8 @@ export default{
                 i = null
             commit("setRow", {property: "last", value: i, n, r})
         }
+
+        //Si es una row secundaria y esta vacia y se borra el primer box, borra la row entera 
         if(b== 0 && r>0 && getters.row({property: "last", n, r}) == null){
             dispatch("select", {n, r: r-1, b: 0})
             commit("deleteRow", {n, r})
@@ -343,7 +393,7 @@ export default{
 }
 
 const isFinal = (symbol) => {
-    return /coil|reset|set|ton-top|ctu-top/.test(symbol)
+    return /coil|reset|set|ton-top|ctu-top|deleteInput/.test(symbol)
 }
 
 const isReplaceable = (symbol) => {

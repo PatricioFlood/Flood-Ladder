@@ -12,7 +12,7 @@
     </div>
 </template>
 <script>
-import Box from "./Box.vue"
+import Box from "@/components/ladder/Box.vue"
 import {useStore} from "vuex"
 export default{
     props: {n: Number, row: Array, auxRow: Array},

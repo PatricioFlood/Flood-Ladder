@@ -1,33 +1,42 @@
 <template>
     <div class="panel-top">
-                <button @click="putSymbol('top', 'connect')" :disabled="!canPutTop||!canPut"><span class="iconl-arrow-top"></span></button>
-                <button @click="putSymbol('bottom', 'connect')" :disabled="!canPut"><span class="iconl-arrow-bottom"></span></button>
-                <button @click="putSymbol('line', 'connect')" :disabled="!canPut"><span class="iconl-arrow-rigth"></span></button>
-                <div class="contact">
-                    <button @click="menu.contact = !menu.contact" :disabled="!canPut"><span class="iconl-contact"></span></button>
-                    <ul v-show="menu.contact">
-                        <li @click="putSymbol('cno','contact')">NO</li>
-                        <li @click="putSymbol('cnc','contact')">NC</li>
-                        <li @click="putSymbol('n','contact')">N</li>
-                        <li @click="putSymbol('p','contact')">P</li>
-                    </ul>
-                </div>
-                <div class="coil">
-                <button @click="menu.coil = !menu.coil" :disabled="!canPut||!canPutFinal"><span class="iconl-coil" ></span></button>
-                    <ul v-show="menu.coil">
-                        <li @click="putSymbol('coil','coil')">-( )</li>
-                        <li @click="putSymbol('reset','coil')">R</li>
-                        <li @click="putSymbol('set','coil')">S</li>
-                    </ul>
-                </div>
-                <div class="blocks">
-                    <button @click="menu.blocks = !menu.blocks" :disabled="!canPut||!canPutFinal"><span class="iconl-blocks"></span></button>
-                    <ul v-show="menu.blocks">
-                        <li @click="putSymbol('ton', 'block')">TON</li>
-                        <li @click="putSymbol('ctu', 'block')">CTU</li>
-                    </ul>
-                </div>
-    <button @click="deleteSymbol" :disabled="!canDelete"><span class="material-icons trash">delete</span></button>
+        <div v-show="view == 'ladder'" class="ladder-menu">
+            <button @click="putSymbol('top', 'connect')" :disabled="!canPutTop||!canPut" class="arrow-top"><span class="iconl-arrow-top"></span></button>
+            <button @click="putSymbol('bottom', 'connect')" :disabled="!canPut"><span class="iconl-arrow-bottom"></span></button>
+            <button @click="putSymbol('line', 'connect')" :disabled="!canPut" class="line"><span class="iconl-arrow-rigth"></span></button>
+            <div class="contact">
+                <button @click="menu.contact = !menu.contact" :disabled="!canPut"><span class="iconl-contact"></span></button>
+                <ul v-show="menu.contact">
+                    <li @click="putSymbol('cno','contact')">NO</li>
+                    <li @click="putSymbol('cnc','contact')">NC</li>
+                    <li @click="putSymbol('n','contact')">N</li>
+                    <li @click="putSymbol('p','contact')">P</li>
+                </ul>
+            </div>
+            <div class="coil">
+            <button @click="menu.coil = !menu.coil" :disabled="!canPut||!canPutFinal"><span class="iconl-coil" ></span></button>
+                <ul v-show="menu.coil">
+                    <li @click="putSymbol('coil','coil')">-( )</li>
+                    <li @click="putSymbol('reset','coil')">R</li>
+                    <li @click="putSymbol('set','coil')">S</li>
+                </ul>
+            </div>
+            <div class="blocks">
+                <button @click="menu.blocks = !menu.blocks" :disabled="!canPut||!canPutFinal"><span class="iconl-blocks"></span></button>
+                <ul v-show="menu.blocks">
+                    <li @click="putSymbol('ton', 'block')">TON</li>
+                    <li @click="putSymbol('ctu', 'block')">CTU</li>
+                </ul>
+            </div>
+            <button @click="deleteSymbol" :disabled="!canDelete"><span class="material-icons trash">delete</span></button>
+        </div>
+        <div class="menu">
+            <button @click="menu.principal = !menu.principal"><span class="material-icons">menu</span></button>
+            <ul v-show="menu.principal" class="menu-items">
+                    <li @click="changeView('symbol-table')"><span class="material-icons">backup_table</span>Tabla de Símbolos</li>
+                    <li @click="changeView('ladder')"><span class="material-icons">description</span>Bloque de Programa</li>
+            </ul>
+        </div>
     </div>
 </template>
 <script>
@@ -40,6 +49,7 @@ export default {
             contact: false,
             coil: false,
             blocks: false,
+            principal: false,
         })
         const closeMenu = () => menu.contact = menu.coil = menu.blocks = false
         
@@ -51,6 +61,7 @@ export default {
             store.dispatch("deleteSymbol")
         }
         const selected = computed(() => store.state.selected)
+        const view = computed(() => store.state.currentView)
 
         const canPut = computed(() => {
             if(store.getters.box({property: "symbol"}) == "center-input")
@@ -71,13 +82,17 @@ export default {
             else
                 return false
         })
-        
         const canDelete = computed(() => {
             var symbol = store.getters.box({property: "symbol"})
             return (selected.value.r != -1 && symbol != "center-input" && symbol != "start" && symbol != "continue")
         })
 
-        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete}
+        const changeView = (view) => {
+            menu.principal = false
+            store.commit("setView", view)
+        }
+
+        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, view, changeView}
     },
 }
 </script>
@@ -86,17 +101,36 @@ export default {
     width: 100%;
     flex-grow: 1;
     height: 50px;
-    background-color: rgb(117, 117, 19);
+    background-color: rgb(24, 99, 99);
     display: flex;
     align-items: center;
-    padding-left: 10px;
+    justify-content: flex-start;
+    padding-left: 5px;
+}
+.panel-top .ladder-menu{
+    display: flex;
 }
 .panel-top button{
     padding: 3px;
     font-size: 25px;
-    color: rgb(41, 41, 41);
     margin-right: 5px;
+    color: rgb(41, 41, 41);
     cursor: pointer
+}
+.menu{
+    display: none;
+    margin-left: auto;
+}
+.panel-top .menu button{   
+    background: none;
+    border: none;
+    margin-right: 5px;
+}
+.panel-top .menu button:hover{
+    background: rgba(0, 0, 0, 0.062);
+}
+.panel-top .menu button span{
+    color: rgb(202, 202, 202);
 }
 .panel-top .trash{
     color: rgb(187, 65, 65);
@@ -121,5 +155,28 @@ export default {
 }
 .panel-top li:hover{
     background-color: rgb(151, 202, 182);
+}
+
+.panel-top .menu ul{
+    width: 200px;
+    right: 0;
+    top: 50px;
+    background: rgb(24, 99, 99);
+
+}
+
+.panel-top .menu li{
+   color: rgb(202, 202, 202);
+}
+
+@media screen and (max-width: 768px) {
+    .menu{
+        display: block;
+    }
+}
+@media screen and (max-width: 330px) {
+    .line, .arrow-top{
+        display: none;
+    }
 }
 </style>

@@ -1,23 +1,48 @@
 <template>
     <div class="box" @click="selectBox" :class="[{'selected' : box.selected}, box.cssClass, {'symbol-top' : box.connection.top}, {'symbol-bottom' : box.connection.bottom}]">
-        <input type="text" v-model="boxInput" v-if="box.input">
+        <input type="text" v-model="boxInput" v-if="box.input" @blur="sendData" @keyup.enter="sendData" :class="inputValid" spellcheck="false">
         <div class="block-data1" v-show="box.blockData1">{{box.blockData1}}</div>
         <div class="block-data2" v-show="box.blockData2">{{box.blockData2}}</div>
         <div class="box-background"></div>
     </div>
 </template>
 <script>
+import { ref } from '@vue/reactivity'
 import {useStore} from "vuex"
+import { watch } from '@vue/runtime-core'
 
 export default {
     props: {n: Number, r: Number, b: Number, box: Object},
     setup(props){
         const store = useStore()
-        const boxInput = "???"
+        var boxInput = ref(store.getters.box({property: "data", n: props.n, r: props.r, b: props.b}))
+        var inputValid = ref("")
+        const sendData = () => {
+            inputValid.value = ""
+            let hasSymbol = false
+            for(let row of store.state.symbolTable){
+                if(row.symbol == boxInput.value)
+                    hasSymbol = true
+            }
+            if(!hasSymbol){
+                const regex = /^([QqIiVv][0-7]\.[0-7])|([tT]((3[7-9])|([4-5][0-9])|(6[0-3])))|([cC](([1-5][0-9])|(6[0-3])|([1-9])))$/
+                if(!regex.test(boxInput.value)){
+                    inputValid.value = "error"
+                    return
+                } else 
+                    boxInput.value = boxInput.value[0].toUpperCase() + boxInput.value.slice(1);
+            }
+            inputValid.value = "correct"
+            store.commit("setBox", {property: "data", value: boxInput.value, n: props.n, r: props.r, b: props.b})
+        }
         const selectBox = () => {
             store.dispatch("select", {n: props.n, r: props.r, b: props.b})
         }
-        return {boxInput,selectBox}
+        watch(() => props.box.input, () => {
+            boxInput.value = "???"
+            inputValid.value = ""
+        })
+        return {boxInput,selectBox,sendData,inputValid}
     }
 }
 </script>
@@ -155,5 +180,11 @@ export default {
         text-align: right;
         padding-right: 3px;
         height: 60px
+    }
+    .error{
+        color: rgb(223, 31, 31);
+    }
+    .correct{
+        color: green
     }
 </style>

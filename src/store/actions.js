@@ -1,7 +1,7 @@
 export default{
 
     initialize({dispatch, commit}){
-        for(var i = 0; i<10; i++){
+        for(var i = 0; i<9; i++){
             dispatch("addNetwork")
         }
         commit("setBox", {property: "selected", value: true, n: 0, r: 0, b: 0})

@@ -1,4 +1,9 @@
 export default{
+
+    setView(state, view){
+        state.currentView = view
+    },
+
     //General adds
     addEmptyNetwork(state){
         state.network.push({
@@ -81,5 +86,16 @@ export default{
         if(bottom != undefined)
             state.network[n].row[r].box[b].connection.bottom = bottom
     },
-    
+
+    //symbolTable
+    addRowToSymbolTable(state){
+        state.symbolTable.push({
+            symbol: "",
+            direction: "",
+            comment: "",
+        })
+    },
+    setSymbolTable(state, {property, value, row}){
+        state.symbolTable[row][property] = value
+    },
 }

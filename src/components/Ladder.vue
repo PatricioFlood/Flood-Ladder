@@ -20,20 +20,14 @@ export default {
 }
 </script>
 <style scoped>
-.ladder {
-    height: calc(var(--vh) - 50px);
-    display: flex;
-    flex-grow: 1;
-    width: 100%;
-}
     .spreader-bar {
-        width: 10px;
+        width: 5px;
         flex-shrink: 0;
         height: 100%;
         background-color: grey;
     }
     .networks {
-        width: 280px;
+        width: 270px;
         flex-grow: 1;
         flex-shrink: 0;
         height: calc(var(--vh) - 50px);

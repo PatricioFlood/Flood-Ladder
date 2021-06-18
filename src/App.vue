@@ -1,30 +1,44 @@
 <template>
     <div class="container">
-        <div class="panel-left"></div>
+        <panel-left />
         <div class="principal">
             <panel-top />
-            <ladder />
+            <keep-alive>
+                <component :is="view" class="view"/>
+            </keep-alive>
         </div>
     </div>
 </template>
 <script>
+import PanelLeft from "./components/PanelLeft.vue"
 import PanelTop from "./components/PanelTop.vue"
 import Ladder from "./components/Ladder.vue"
+import SymbolTable from "./components/SymbolTable.vue"
 import {useStore} from "vuex"
+import {computed, onMounted} from '@vue/runtime-core'
 export default {
     name: "App",
-    components: {PanelTop, Ladder},
+    components: {PanelLeft, PanelTop, Ladder, SymbolTable},
     setup(){
         const store = useStore()
-        store.dispatch("initialize")
-
+        const view = computed(() => store.state.currentView)
         //VH para CSS
         const setVH = () => {
             const vh = window.innerHeight;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
+            document.getElementById("app").style.setProperty('--vh', `${vh}px`);
         }
         setVH()
         window.addEventListener("resize", setVH)
+
+        store.dispatch("addNetwork")
+        
+        onMounted(() => {
+            store.dispatch("initialize")
+            store.commit("addRowToSymbolTable")
+        })
+        
+
+        return{view}
     }
 }
 </script>
@@ -32,14 +46,7 @@ export default {
 .container {
     display: flex;
     width: 100%;
-    flex-wrap: wrap;
 }
-    .panel-left {
-        width: 150px;
-        flex-shrink: 0;
-        height: var(--vh);
-        background-color: blue;
-    }
     .principal {
         height: var(--vh);
         display: flex;
@@ -47,20 +54,11 @@ export default {
         width: 300px;
         flex-shrink: 0;
         flex-grow: 1;
-    }      
-    .panel-rigth{
-        width: 300px;
-        flex-shrink: 0;
-        height: var(--vh);
-        background-color: red;
     }
-
-@media screen and (max-width: 425px) {
-    .panel-left{
-        display: none;
-    }
-    .panel-rigth{
-        display:none;
-    }
-}
+        .view{
+            height: calc(var(--vh) - 50px);
+            display: flex;
+            flex-grow: 1;
+            width: 100%;
+        }
 </style>

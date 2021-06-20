@@ -33,8 +33,9 @@
         <div class="menu">
             <button @click="menu.principal = !menu.principal"><span class="material-icons">menu</span></button>
             <ul v-show="menu.principal" class="menu-items">
-                    <li @click="changeView('symbol-table')"><span class="material-icons">backup_table</span>Tabla de Símbolos</li>
-                    <li @click="changeView('ladder')"><span class="material-icons">description</span>Bloque de Programa</li>
+                    <li @click="changeView('symbol-table')" v-show="view != 'symbol-table'"><span class="material-icons">backup_table</span>Tabla de Símbolos</li>
+                    <li @click="changeView('ladder')" v-show="view != 'ladder'"><span class="material-icons">description</span>Bloque de Programa</li>
+                    <li @click="openPanelRun()"><span class="material-icons">play_arrow</span>RUN</li>
             </ul>
         </div>
     </div>
@@ -92,14 +93,18 @@ export default {
             store.commit("setView", view)
         }
 
-        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, view, changeView}
+        const openPanelRun = () => {
+            menu.principal = false
+            store.commit("setPanelRun", true)
+        }
+
+        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, view, changeView, openPanelRun}
     },
 }
 </script>
 <style scoped>
 .panel-top {
     width: 100%;
-    flex-grow: 1;
     height: 50px;
     background-color: rgb(24, 99, 99);
     display: flex;

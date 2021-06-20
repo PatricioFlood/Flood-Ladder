@@ -23,14 +23,12 @@ export default {
     .spreader-bar {
         width: 5px;
         flex-shrink: 0;
-        height: 100%;
         background-color: grey;
     }
     .networks {
         width: 270px;
         flex-grow: 1;
         flex-shrink: 0;
-        height: calc(var(--vh) - 50px);
         display: flex;
         flex-direction: column;
         background-color: rgb(237, 238, 232);

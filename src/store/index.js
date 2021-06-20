@@ -2,6 +2,7 @@ import { createStore } from 'vuex'
 import mutations from "./mutations.js"
 import getters from "./getters.js"
 import actions from "./actions.js"
+import run from "./run/index.js"
 
 export default createStore({
   state: {
@@ -13,5 +14,5 @@ export default createStore({
   mutations,
   getters,
   actions,
-  modules: {}
+  modules: {run}
 })

@@ -32,8 +32,6 @@ export default{
 
             const processStack = (symbol, data) => {
 
-                console.log(stack)
-
                 var sentence = "if("
 
                 const processLoop = (stack, condition) => {

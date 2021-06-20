@@ -52,10 +52,11 @@ export default {
         }
 
         const setI = (byte,bit) => {
-            console.log("setting")
+            window.navigator.vibrate(30);
             store.commit("setI", {byte, bit, value: true})
         }
         const resetI = async (byte,bit) => {
+            window.navigator.vibrate(20);
             await delay(100)
             store.commit("setI", {byte, bit, value: false})
         }
@@ -88,10 +89,11 @@ export default {
         border: none;
         border-radius: 100%;
         padding: 1px;
-        cursor: pointer
+        cursor: pointer;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
     }
     .runstop button:hover{
-        opacity: 80%;
+        opacity: 0.8;
     }
     .run{
         color: green;
@@ -117,17 +119,18 @@ export default {
         border: 5px solid rgb(170, 170, 170);
         background: rgb(48, 212, 48);
         cursor: pointer;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
     }
-    .push-button:hover{
-        background: rgb(42, 180, 42);
+    .push-button:active{
+        background: rgb(31, 129, 31);
     }
 
     .push-button.red{
         background: rgb(212, 48, 48);
         cursor: pointer;
     }
-    .push-button.red:hover{
-        background: rgb(180, 42, 42);
+    .push-button.red:active{
+        background: rgb(107, 26, 26);
     }
 
     .pilot-ligth{

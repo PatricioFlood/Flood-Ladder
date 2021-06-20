@@ -30,6 +30,8 @@
             </div>
             <button @click="deleteSymbol" :disabled="!canDelete"><span class="material-icons trash">delete</span></button>
         </div>
+        <div v-show="view == 'symbol-table'"><button @click="deleteTable()"><span class="material-icons trash">delete</span></button></div>
+        <alert v-if="alert" @close="alert = false" @check="deleteTable(true)">¿Desea vaciar la tabla de símbolos?</alert>
         <div class="menu">
             <button @click="menu.principal = !menu.principal"><span class="material-icons">menu</span></button>
             <ul v-show="menu.principal" class="menu-items">
@@ -41,9 +43,11 @@
     </div>
 </template>
 <script>
-import { computed, reactive } from '@vue/runtime-core'
+import { computed, reactive, ref } from '@vue/runtime-core'
 import {useStore} from "vuex"
+import Alert from "./alert/alert.vue"
 export default {
+    components: {Alert},
     setup() {
         const store = useStore()
         const menu = reactive({
@@ -52,6 +56,8 @@ export default {
             blocks: false,
             principal: false,
         })
+        const alert = ref(false)
+
         const closeMenu = () => menu.contact = menu.coil = menu.blocks = false
         
         const putSymbol = (symbol, type) => {
@@ -98,7 +104,16 @@ export default {
             store.commit("setPanelRun", true)
         }
 
-        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, view, changeView, openPanelRun}
+        const deleteTable = (confirm = false) => {
+            if(!confirm){
+                alert.value = true;
+            } else {
+                alert.value = false;
+                store.commit("resetSymbolTable")
+            }
+        }
+
+        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, view, changeView, openPanelRun, deleteTable, alert}
     },
 }
 </script>

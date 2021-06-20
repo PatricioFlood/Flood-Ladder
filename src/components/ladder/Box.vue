@@ -15,35 +15,76 @@ export default {
     props: {n: Number, r: Number, b: Number, box: Object},
     setup(props){
         const store = useStore()
-        var boxInput = ref(store.getters.box({property: "data", n: props.n, r: props.r, b: props.b}))
+        var boxInput = ref(store.getters.box({property: "name", n: props.n, r: props.r, b: props.b}))
         var inputValid = ref("")
+        var data = ref(store.getters.box({property: "data", n: props.n, r: props.r, b: props.b}))
+
         const sendData = () => {
-            inputValid.value = ""
-            let hasSymbol = false
-            for(let row of store.state.symbolTable){
-                if(row.symbol == boxInput.value)
-                    hasSymbol = true
+
+            if(!boxInput.value){
+                boxInput.value = "???"
+                inputValid.value = "error"
             }
-            if(!hasSymbol){
-                const regex = /^([QqIiVv][0-7]\.[0-7])|([tT]((3[7-9])|([4-5][0-9])|(6[0-3])))|([cC](([1-5][0-9])|(6[0-3])|([1-9])))$/
-                if(!regex.test(boxInput.value)){
+
+            inputValid.value = ""
+            
+            const regex = /^([QqIiVv][0-7]\.[0-7])|([tT]((3[7-9])|([4-5][0-9])|(6[0-3])))|([cC](([1-5][0-9])|(6[0-3])|([1-9])))$/
+
+            if(regex.test(boxInput.value)){
+                data.value = boxInput.value[0].toUpperCase() + boxInput.value.slice(1);
+                let symbol = store.getters.searchSymbolTableByDirection(data.value)
+                if(symbol){
+                    boxInput.value = symbol
+                } else if (boxInput.value[0] == "Q" || boxInput.value[0] == "I"){
+                    store.commit("addRowToSymbolTable")
+                    store.commit("setSymbolTable", {property: "direction", value: data.value, row: store.state.symbolTable.length-1})
+                } else {
+                    boxInput.value = data.value
+                }
+            } else {
+                data.value = store.getters.searchSymbolTable(boxInput.value)
+                if(!data.value){
                     inputValid.value = "error"
                     return
-                } else 
-                    boxInput.value = boxInput.value[0].toUpperCase() + boxInput.value.slice(1);
+                }
             }
+            
             inputValid.value = "correct"
-            store.commit("setBox", {property: "data", value: boxInput.value, n: props.n, r: props.r, b: props.b})
+            store.commit("setBox", {property: "data", value: data, n: props.n, r: props.r, b: props.b})
+            store.commit("setBox", {property: "name", value: boxInput.value, n: props.n, r: props.r, b: props.b})
             localStorage.setItem("network",JSON.stringify(store.state.network))
             localStorage.setItem("selected",JSON.stringify(store.state.selected))
         }
+
+        const actualizeData = () => {
+                let symbol = store.getters.searchSymbolTableByDirection(data.value)
+                if(symbol){
+                    boxInput.value = symbol
+                } else {
+                    boxInput.value = data.value
+                    if (boxInput.value[0] == "Q" || boxInput.value[0] == "I"){
+                        store.commit("addRowToSymbolTable")
+                        store.commit("setSymbolTable", {property: "direction", value: data.value, row: store.state.symbolTable.length-1})
+                    }
+                }
+                
+        }
+
         const selectBox = () => {
             store.dispatch("select", {n: props.n, r: props.r, b: props.b})
         }
+
         watch(() => props.box.input, () => {
             boxInput.value = "???"
             inputValid.value = ""
         })
+
+        watch(() => store.state.symbolTable, () => {
+            if(props.box.input){
+                actualizeData()
+            }
+        }, {deep: true, })
+
         return {boxInput,selectBox,sendData,inputValid}
     }
 }

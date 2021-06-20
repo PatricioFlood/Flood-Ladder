@@ -6,11 +6,13 @@
             v-model="table.direction" @blur="setTable('direction')" @keyup.enter="setTable('direction')">
             <input type="text" :class="['input-comment']" 
             v-model="table.comment" @blur="setTable('comment')" @keyup.enter="setTable('comment')">
+            <button><span class="material-icons">delete</span></button>
     </div>
 </template>
 <script>
 import { reactive } from '@vue/reactivity'
 import {useStore} from "vuex"
+import { watch } from '@vue/runtime-core'
 export default {
     props: {row: Number},
     setup(props) {
@@ -37,14 +39,12 @@ export default {
                     for(let [i, row] of store.state.symbolTable.entries()){
                         if(i != props.row && row.direction == table.direction){
                             verify.direction = "repeat"
-                            return 
                         }
                     }
                     verify.direction = "correct"
                 }
                 else{
                     verify.direction = "error"
-                    return
                 }
                     
             } else if (property == "symbol"){
@@ -62,11 +62,18 @@ export default {
                 }
                 else{
                     verify.symbol = "error"
-                    return
                 }
             }
             store.commit("setSymbolTable", {property, value: table[property], row: props.row})
         }
+        
+        watch(() => store.state.symbolTable[props.row], () => {
+            if(store.state.symbolTable[props.row]){
+                table.symbol = store.state.symbolTable[props.row].symbol
+                table.direction = store.state.symbolTable[props.row].direction
+                table.comment = store.state.symbolTable[props.row].comment
+            }
+        })
 
         return{table, setTable, verify}
     },

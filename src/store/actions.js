@@ -282,7 +282,8 @@ export default{
         commit("setBox", {property: "blockData1", value: "", n, r, b})
         commit("setBox", {property: "blockData2", value: "", n, r, b})
         commit("setBox", {property: "input", value: false, n, r, b})
-        commit("setBox", {property: "data", value: "???", n, r, b})
+        commit("setBox", {property: "data", value: "", n, r, b})
+        commit("setBox", {property: "name", value: "???", n, r, b})
     },
 
     putSymbol({state, dispatch, commit, getters}, {symbol, type, n, r, b}){

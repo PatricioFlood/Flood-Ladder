@@ -6,24 +6,28 @@
             <button @click="closePanel" v-show="!run"><span class="material-icons">close</span></button>
         </div>
         <div class="buttons">
-            <div class="push-button" @mousedown="setI(0,0)" @mouseup="resetI(0,0)" @touchstart.passive="setI(0,0)" @touchend.passive="resetI(0,0)"></div>
-            <div class="push-button red" @mousedown="setI(0,1)" @mouseup="resetI(0,1)" @touchstart.passive="setI(0,1)" @touchend.passive="resetI(0,1)"></div>
+            <div v-for="button of pushButtons" :key="button.direction" 
+            :class="[
+            'push-button', 
+            {'red': /[rR][oO][jJ][Oo]/.test(button.comment)},
+            {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oO]/.test(button.comment)}
+            ]" 
+            @mousedown="setI(button)" @mouseup="resetI(button)" 
+            @touchstart.passive="setI(button)" @touchend.passive="resetI(button)">
+            {{button.symbol||button.direction}}
+            <div class="nc" v-show="/[nN][cC]/.test(button.comment)">NC</div>
+            </div>
         </div>
         <div class="ligths">
-            <div class="pilot-ligth" :class="{'on': Q[0][0]}">
-                Q0.0
-            </div>
-            <div class="pilot-ligth" :class="{'on': Q[0][1]}">
-                Q0.1
-            </div>
-            <div class="pilot-ligth" :class="{'on': Q[0][2]}">
-                Q0.2
-            </div>
-            <div class="pilot-ligth" :class="{'on': Q[0][3]}">
-                Q0.3
-            </div>
-            <div class="pilot-ligth" :class="{'on': Q[0][4]}">
-                Q0.4
+            <div v-for="ligth of ligths" :key="ligth.direction"
+            :class="[
+            'pilot-ligth',
+            {'on': Q[ligth.direction[1]][ligth.direction[3]]},
+            {'red': /[rR][oO][jJ][OoaA]/.test(ligth.comment)},
+            {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oOaA]/.test(ligth.comment)},
+            {'blue': /[aA][zZ][uU][lL]/.test(ligth.comment)},
+            ]">
+            {{ligth.symbol||ligth.direction}}
             </div>
         </div>
     </div>
@@ -43,7 +47,19 @@ export default {
 
         const run = computed(() => store.state.run.run)
 
+        const pushButtons = computed(() => {
+            return store.state.symbolTable.filter(row => row.direction && row.direction[0] == "I").sort(((a, b) => a.direction > b.direction || -1))
+        })
+
+        const ligths = computed(() => {
+            return store.state.symbolTable.filter(row => row.direction && row.direction[0] == "Q").sort(((a, b) => a.direction > b.direction || -1))
+        })
+
         const runLadder = () => {
+            for(let button of pushButtons.value){
+                const value = /[nN][cC]/.test(button.comment)
+                    store.commit("setI", {byte: button.direction[1], bit: button.direction[3], value})
+            }
             store.dispatch("runLadder")
         }
 
@@ -51,21 +67,23 @@ export default {
             store.dispatch("stopLadder")
         }
 
-        const setI = (byte,bit) => {
+        const setI = (button) => {
             window.navigator.vibrate(30);
-            store.commit("setI", {byte, bit, value: true})
+            const value = !/[nN][cC]/.test(button.comment)
+            store.commit("setI", {byte: button.direction[1], bit: button.direction[3], value})
         }
-        const resetI = async (byte,bit) => {
+        const resetI = async (button) => {
             window.navigator.vibrate(20);
+            const value = /[nN][cC]/.test(button.comment)
             await delay(100)
-            store.commit("setI", {byte, bit, value: false})
+            store.commit("setI", {byte: button.direction[1], bit: button.direction[3], value})
         }
 
         const closePanel = () => {
             store.commit("setPanelRun", false)
         }
 
-        return{Q, setI, resetI, run, runLadder, stopLadder, closePanel}
+        return{Q, setI, resetI, run, runLadder, stopLadder, closePanel, pushButtons, ligths}
     },
 }
 </script>
@@ -120,6 +138,18 @@ export default {
         background: rgb(48, 212, 48);
         cursor: pointer;
         -webkit-tap-highlight-color: rgba(0,0,0,0);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        overflow: hidden;
+        user-select: none;
+        position: relative;
+    }
+    .push-button .nc{
+        position: absolute;
+        bottom: 8px;
+        font-size: 15px;
     }
     .push-button:active{
         background: rgb(31, 129, 31);
@@ -127,27 +157,59 @@ export default {
 
     .push-button.red{
         background: rgb(212, 48, 48);
-        cursor: pointer;
     }
     .push-button.red:active{
         background: rgb(107, 26, 26);
     }
+    .push-button.yellow{
+        background: rgb(227, 230, 51);
+    }
+    .push-button.yellow:active{
+        background: rgb(152, 155, 16);
+    }
 
     .pilot-ligth{
-        height: 65px;
-        width: 65px;
+        height: 80px;
+        width: 80px;
         border-radius: 100%;
         border: 10px solid rgb(10, 87, 10);
         background: rgb(5, 59, 5);
-        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: rgb(170, 169, 169);
+        color: rgb(214, 214, 214);
+        overflow: hidden;
+        user-select: none;
+        font-size: 13px;
     }
 
     .pilot-ligth.on{
         border: 10px solid rgb(42, 199, 42);
         background: rgb(30, 247, 30);
+        color: black;
+    }
+    .pilot-ligth.red{
+        border: 10px solid rgb(87, 10, 10);
+        background: rgb(59, 5, 5);
+    }
+    .pilot-ligth.red.on{
+        border: 10px solid rgb(199, 42, 42);
+        background: rgb(247, 30, 30);
+    }
+    .pilot-ligth.yellow{
+        border: 10px solid rgb(87, 86, 10);
+        background: rgb(55, 59, 5);
+    }
+    .pilot-ligth.yellow.on{
+        border: 10px solid rgb(196, 199, 42);
+        background: rgb(233, 247, 30);
+    }
+    .pilot-ligth.blue{
+        border: 10px solid rgb(18, 10, 87);
+        background: rgb(5, 13, 59);
+    }
+    .pilot-ligth.blue.on{
+        border: 10px solid rgb(42, 79, 199);
+        background: rgb(30, 117, 247);
     }
 </style>

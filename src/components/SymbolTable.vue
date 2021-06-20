@@ -74,5 +74,6 @@ export default {
     .title-comment{
         width: 90px;
         flex-grow: 2;
+        margin-right: 28px;
     }
 </style>

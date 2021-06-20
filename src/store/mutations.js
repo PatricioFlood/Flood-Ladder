@@ -43,7 +43,8 @@ export default{
     addEmptyBox(state, {n, r}){
         state.network[n].row[r].box.push({
             symbol: "",
-            data: "???", 
+            data: "", 
+            name: "???",
             cssClass: "", 
             input: false, 
             selected: false, 
@@ -97,6 +98,11 @@ export default{
     },
     setSymbolTable(state, {property, value, row}){
         state.symbolTable[row][property] = value
+        localStorage.setItem("symbolTable",JSON.stringify(state.symbolTable))
+    },
+
+    resetSymbolTable(state){
+        state.symbolTable = []
         localStorage.setItem("symbolTable",JSON.stringify(state.symbolTable))
     },
 

@@ -23,5 +23,20 @@ export default{
     },
     selectedLast: (state) => {
         return state.selected.r>-1?state.network[state.selected.n].row[state.selected.r].last:null
+    },
+
+    searchSymbolTable: (state) => (symbol) => {
+        for(let row of state.symbolTable){
+            if(row.symbol == symbol)
+                return row.direction
+        }
+        return ""
+    },
+    searchSymbolTableByDirection: (state) => (direction) => {
+        for(let row of state.symbolTable){
+            if(row.direction == direction)
+                return row.symbol||direction
+        }
+        return ""
     }
-}
+ }

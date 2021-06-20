@@ -97,5 +97,14 @@ export default{
     },
     setSymbolTable(state, {property, value, row}){
         state.symbolTable[row][property] = value
+        localStorage.setItem("symbolTable",JSON.stringify(state.symbolTable))
     },
+
+    setSymbolTableFromLocal(state,value){
+        state.symbolTable = value
+    },
+    
+    setNetwork(state,value){
+        state.network = value
+    }
 }

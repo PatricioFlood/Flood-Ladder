@@ -29,6 +29,8 @@
     </div>
 </template>
 <script>
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 import { computed } from '@vue/runtime-core'
 
 import {useStore} from "vuex"
@@ -53,7 +55,8 @@ export default {
             console.log("setting")
             store.commit("setI", {byte, bit, value: true})
         }
-        const resetI = (byte,bit) => {
+        const resetI = async (byte,bit) => {
+            await delay(100)
             store.commit("setI", {byte, bit, value: false})
         }
 

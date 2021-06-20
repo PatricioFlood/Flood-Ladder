@@ -1,10 +1,26 @@
 export default{
 
     initialize({dispatch, commit}){
-        for(var i = 0; i<9; i++){
-            dispatch("addNetwork")
+        const local = localStorage.getItem("network")
+        if(local){
+            commit("setNetwork", JSON.parse(local))
+            const selected = JSON.parse(localStorage.getItem("selected"))
+            commit("setBox", {property: "selected", value: false, n: selected.n, r: selected.r, b: selected.b})
+        }
+        else {
+            for(var i = 0; i<10; i++){
+                dispatch("addNetwork")
+            }
         }
         commit("setBox", {property: "selected", value: true, n: 0, r: 0, b: 0})
+    },
+
+    initializeSymbolTable({commit}){
+        const local = localStorage.getItem("symbolTable")
+        if(local)
+            commit("setSymbolTableFromLocal", JSON.parse(local))
+        else
+            commit("addRowToSymbolTable")
     },
 
     addNetwork({commit, state, dispatch}){
@@ -68,7 +84,6 @@ export default{
             commit("setSelected", {n, r: -1, b: ab})
             commit("setAuxBox", {property: "selected", value: true, n, ab})
         }
-            
     },
 
     putBottom({state,dispatch,getters}, {n, r, b}){
@@ -86,9 +101,11 @@ export default{
             
 
         dispatch("select", {n, r: r+1, b: b+1})
+        localStorage.setItem("network",JSON.stringify(state.network))
+        localStorage.setItem("selected",JSON.stringify(state.selected))
     },
 
-    putTop({getters, dispatch}, {n,r,b}){
+    putTop({getters, dispatch, state}, {n,r,b}){
         dispatch("resetConnection", {add: true, pos: "top", n, r, b})
 
         if(getters.box({property: "symbol", n, r: r, b: b+1}) == "continue")
@@ -101,6 +118,8 @@ export default{
             dispatch("putSymbol", {symbol: "line", type: "connect", n, r, b})
 
         dispatch("select", {n, r: r-1, b: b+1}) 
+        localStorage.setItem("network",JSON.stringify(state.network))
+        localStorage.setItem("selected",JSON.stringify(state.selected))
     },
 
     putTon({state, getters, commit, dispatch},{n,r,b}){
@@ -118,7 +137,8 @@ export default{
         commit("setRow", {property: "last", value: b, n, r})
         commit("setRow", {property: "final", value: b-1, n, r: r+1})
         commit("setRow", {property: "last", value: b-1, n, r: r+1})
-       
+        localStorage.setItem("network",JSON.stringify(state.network))
+        localStorage.setItem("selected",JSON.stringify(state.selected))
     },
 
     putCtu({state, getters, commit, dispatch},{n,r,b}){
@@ -148,6 +168,8 @@ export default{
         commit("setRow", {property: "last", value: b, n, r: r+1})
         commit("setRow", {property: "final", value: b-1, n, r: r+2})
         commit("setRow", {property: "last", value: b-1, n, r: r+2})    
+        localStorage.setItem("network",JSON.stringify(state.network))
+        localStorage.setItem("selected",JSON.stringify(state.selected))
     },
 
     setLast({getters, commit}, {n, r, b, force=false}){
@@ -327,6 +349,8 @@ export default{
             dispatch("select", {n, r, b: b+1})   
         }
 
+        localStorage.setItem("network",JSON.stringify(state.network))
+        localStorage.setItem("selected",JSON.stringify(state.selected))
     },
 
     deleteSymbol({state, commit, dispatch, getters}, {n, r, b} = {n: state.selected.n, r: state.selected.r, b: state.selected.b}){
@@ -389,6 +413,8 @@ export default{
             commit("deleteRow", {n, r})
         }
             
+        localStorage.setItem("network",JSON.stringify(state.network))
+        localStorage.setItem("selected",JSON.stringify(state.selected))
     },
 }
 

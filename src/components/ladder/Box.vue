@@ -34,6 +34,8 @@ export default {
             }
             inputValid.value = "correct"
             store.commit("setBox", {property: "data", value: boxInput.value, n: props.n, r: props.r, b: props.b})
+            localStorage.setItem("network",JSON.stringify(store.state.network))
+            localStorage.setItem("selected",JSON.stringify(store.state.selected))
         }
         const selectBox = () => {
             store.dispatch("select", {n: props.n, r: props.r, b: props.b})

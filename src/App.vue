@@ -33,12 +33,11 @@ export default {
         setVH()
         window.addEventListener("resize", setVH)
 
-        store.dispatch("addNetwork")
-        store.dispatch("initializeStateTable") //Mover a onMounted despues
+        store.dispatch("initialize")
+        store.dispatch("initializeStateTable")
 
         onMounted(() => {
-            store.dispatch("initialize")
-            store.commit("addRowToSymbolTable")
+            store.dispatch("initializeSymbolTable")
         })
         
         return{view, panelRun}

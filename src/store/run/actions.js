@@ -135,7 +135,7 @@ export default{
 
             commit("imageToStateTable", tableImage)
 
-            await delay(50)
+            await delay(100)
         }
 
         

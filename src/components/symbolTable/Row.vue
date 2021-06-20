@@ -1,11 +1,11 @@
 <template>
     <div class="row">
             <input type="text" :class="['input-symbol', verify.symbol]" 
-            v-model="table.symbol" @blur="setTable('symbol')" @keyup.enter="setTable('symbol')">
+            v-model="table.symbol" @blur="setTable('symbol')" @keyup.enter="setTable('symbol')" autocomplete="ladder_symbol">
             <input type="text" :class="['input-direction', verify.direction]" 
-            v-model="table.direction" @blur="setTable('direction')" @keyup.enter="setTable('direction')">
+            v-model="table.direction" @blur="setTable('direction')" @keyup.enter="setTable('direction')" autocomplete="ladder_direction">
             <input type="text" :class="['input-comment']" 
-            v-model="table.comment" @blur="setTable('comment')" @keyup.enter="setTable('comment')">
+            v-model="table.comment" @blur="setTable('comment')" @keyup.enter="setTable('comment')" autocomplete="ladder_comment">
             <button><span class="material-icons">delete</span></button>
     </div>
 </template>

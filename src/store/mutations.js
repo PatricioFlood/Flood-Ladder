@@ -5,6 +5,9 @@ export default{
     },
 
     //General adds
+    replaceNetwork(state, value){
+        state.network = value
+    },
     addEmptyNetwork(state){
         state.network.push({
             row: [],
@@ -103,6 +106,11 @@ export default{
 
     resetSymbolTable(state){
         state.symbolTable = []
+        localStorage.setItem("symbolTable",JSON.stringify(state.symbolTable))
+    },
+
+    deleteRowSymbolTable(state, row){
+        state.symbolTable.splice(row,1)
         localStorage.setItem("symbolTable",JSON.stringify(state.symbolTable))
     },
 

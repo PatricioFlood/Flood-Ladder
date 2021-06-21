@@ -5,29 +5,31 @@
             <button @click="stopLadder" v-show="run" class="stop"><span class="material-icons">stop</span></button>
             <button @click="closePanel" v-show="!run"><span class="material-icons">close</span></button>
         </div>
-        <div class="buttons">
-            <div v-for="button of pushButtons" :key="button.direction" 
-            :class="[
-            'push-button', 
-            {'red': /[rR][oO][jJ][Oo]/.test(button.comment)},
-            {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oO]/.test(button.comment)}
-            ]" 
-            @mousedown="setI(button)" @mouseup="resetI(button)" 
-            @touchstart.passive="setI(button)" @touchend.passive="resetI(button)">
-            {{button.symbol||button.direction}}
-            <div class="nc" v-show="/[nN][cC]/.test(button.comment)">NC</div>
+        <div class="content">
+            <div class="buttons">
+                <div v-for="button of pushButtons" :key="button.direction" 
+                :class="[
+                'push-button', 
+                {'red': /([rR][oO][jJ][Oo])|([nN][cC])/.test(button.comment) && !/[vV][eE][rR][dD][eE]/.test(button.comment)},
+                {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oO]/.test(button.comment)}
+                ]" 
+                @mousedown="setI(button)" @mouseup="resetI(button)" 
+                @touchstart.passive="setI(button)" @touchend.passive="resetI(button)">
+                {{button.symbol||button.direction}}
+                <div class="nc" v-show="/[nN][cC]/.test(button.comment)">NC</div>
+                </div>
             </div>
-        </div>
-        <div class="ligths">
-            <div v-for="ligth of ligths" :key="ligth.direction"
-            :class="[
-            'pilot-ligth',
-            {'on': Q[ligth.direction[1]][ligth.direction[3]]},
-            {'red': /[rR][oO][jJ][OoaA]/.test(ligth.comment)},
-            {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oOaA]/.test(ligth.comment)},
-            {'blue': /[aA][zZ][uU][lL]/.test(ligth.comment)},
-            ]">
-            {{ligth.symbol||ligth.direction}}
+            <div class="ligths">
+                <div v-for="ligth of ligths" :key="ligth.direction"
+                :class="[
+                'pilot-ligth',
+                {'on': Q[ligth.direction[1]][ligth.direction[3]]},
+                {'red': /[rR][oO][jJ][OoaA]/.test(ligth.comment)},
+                {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oOaA]/.test(ligth.comment)},
+                {'blue': /[aA][zZ][uU][lL]/.test(ligth.comment)},
+                ]">
+                {{ligth.symbol||ligth.direction}}
+                </div>
             </div>
         </div>
     </div>
@@ -89,16 +91,24 @@ export default {
 </script>
 <style scoped>
     .panelRun{
-        height: 50%;
         width: 100%;
         display: flex;
         flex-direction: column;
         background: rgb(216, 253, 246);
+        max-height: 50%;
+        padding-top: 2px;
     }
     .runstop{
         display: flex;
         justify-content: space-between;
-        margin: 5px;
+        padding: 5px 10px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.205);
+    }
+    .content{
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+        padding: 10px;
     }
     .runstop span{
         font-size: 35px;
@@ -169,6 +179,7 @@ export default {
     }
 
     .pilot-ligth{
+        margin-top: 10px;
         height: 80px;
         width: 80px;
         border-radius: 100%;

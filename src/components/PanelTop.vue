@@ -30,20 +30,21 @@
             </div>
             <button @click="deleteSymbol" :disabled="!canDelete"><span class="material-icons trash">delete</span></button>
         </div>
-        <div v-show="view == 'symbol-table'"><button @click="deleteTable()"><span class="material-icons trash">delete</span></button></div>
-        <alert v-if="alert" @close="alert = false" @check="deleteTable(true)">¿Desea vaciar la tabla de símbolos?</alert>
+        <div v-show="view == 'symbol-table'" class="symbolTable-title">Tabla de Símbolos</div>
         <div class="menu">
-            <button @click="menu.principal = !menu.principal"><span class="material-icons">menu</span></button>
+            <button @click="menu.principal = !menu.principal" class="menu-button"><span class="material-icons">menu</span></button>
             <ul v-show="menu.principal" class="menu-items">
-                    <li @click="changeView('symbol-table')" v-show="view != 'symbol-table'"><span class="material-icons">backup_table</span>Tabla de Símbolos</li>
-                    <li @click="changeView('ladder')" v-show="view != 'ladder'"><span class="material-icons">description</span>Bloque de Programa</li>
-                    <li @click="openPanelRun()"><span class="material-icons">play_arrow</span>RUN</li>
+                    <li @click="changeView('symbol-table')" v-show="view != 'symbol-table'"><span class="material-icons" style="color: #2DACA1">backup_table</span>Tabla de Símbolos</li>
+                    <li @click="changeView('ladder')" v-show="view != 'ladder'"><span class="material-icons" style="color: #2DACA1">description</span>Bloque de Programa</li>
+                    <li @click="openPanelRun()" v-show="!run"><span class="material-icons" style="color: #6BB464">play_arrow</span>Simulación</li>
+                    <li @click="resetNetworks()" v-show="view == 'ladder'"><span class="material-icons" style="color: #A03C3C">delete</span>Vaciar Networks</li>
             </ul>
         </div>
+        <alert v-if="menu.alert" @close="menu.alert = false" @check="resetNetworks(true)">¿Desea vaciar todos los networks?</alert>
     </div>
 </template>
 <script>
-import { computed, reactive, ref } from '@vue/runtime-core'
+import { computed, reactive } from '@vue/runtime-core'
 import {useStore} from "vuex"
 import Alert from "./alert/alert.vue"
 export default {
@@ -55,8 +56,9 @@ export default {
             coil: false,
             blocks: false,
             principal: false,
+            alert: false,
         })
-        const alert = ref(false)
+        
 
         const closeMenu = () => menu.contact = menu.coil = menu.blocks = false
         
@@ -69,6 +71,7 @@ export default {
         }
         const selected = computed(() => store.state.selected)
         const view = computed(() => store.state.currentView)
+        const run = computed(() => store.state.run.panelRun)
 
         const canPut = computed(() => {
             if(store.getters.box({property: "symbol"}) == "center-input")
@@ -104,16 +107,18 @@ export default {
             store.commit("setPanelRun", true)
         }
 
-        const deleteTable = (confirm = false) => {
+        const resetNetworks = (confirm = false) => {
             if(!confirm){
-                alert.value = true;
+                menu.alert = true
+                menu.principal = false
             } else {
-                alert.value = false;
-                store.commit("resetSymbolTable")
+                menu.alert = false
+                store.dispatch("resetNetworks")
             }
         }
 
-        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, view, changeView, openPanelRun, deleteTable, alert}
+
+        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, view, changeView, openPanelRun, run, resetNetworks}
     },
 }
 </script>
@@ -131,27 +136,51 @@ export default {
     display: flex;
 }
 .panel-top button{
-    padding: 3px;
-    font-size: 25px;
+    border-radius: 15%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 23px;
+    width: 36px;
+    height: 36px;
     margin-right: 5px;
     color: rgb(41, 41, 41);
-    cursor: pointer
+    cursor: pointer;
+    border: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+.panel-top button:active{
+    opacity: 0.9;
 }
 .menu{
     display: none;
     margin-left: auto;
+    height: 100%;
 }
-.panel-top .menu button{   
+.panel-top .menu-button{
+    height: 100%;
+    padding: 7px;
     background: none;
     border: none;
-    margin-right: 5px;
+    margin: 0;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    user-select: none;
 }
-.panel-top .menu button:hover{
-    background: rgba(0, 0, 0, 0.062);
-}
-.panel-top .menu button span{
+.panel-top .menu-button span{
+    font-size: 30px;
     color: rgb(202, 202, 202);
 }
+.panel-top .menu-button:active{
+    background: rgba(0, 0, 0, 0.062);
+}
+
+.symbolTable-title{
+    width: 100%;
+    text-align: center;
+    color: rgb(181, 214, 216);
+    font-size: 23px;
+}
+
 .panel-top .trash{
     color: rgb(187, 65, 65);
 }
@@ -173,12 +202,13 @@ export default {
     cursor: pointer;
     border-bottom: 1px solid rgba(0, 0, 0, 0.137);
 }
-.panel-top li:hover{
+.panel-top li:active{
     background-color: rgb(151, 202, 182);
 }
 
 .panel-top .menu ul{
     width: 200px;
+    height: calc(var(--vh) - 50px);
     right: 0;
     top: 50px;
     background: rgb(24, 99, 99);
@@ -186,7 +216,19 @@ export default {
 }
 
 .panel-top .menu li{
-   color: rgb(202, 202, 202);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    color: rgb(202, 202, 202);
+    font-size: 20px;
+}
+
+.panel-top .menu li span{
+    font-size: 30px;
+    margin-right: 4px;
 }
 
 @media screen and (max-width: 768px) {
@@ -195,7 +237,7 @@ export default {
     }
 }
 @media screen and (max-width: 330px) {
-    .line, .arrow-top{
+    .panel-top .line, .panel-top .arrow-top{
         display: none;
     }
 }

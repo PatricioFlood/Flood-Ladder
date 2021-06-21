@@ -1,18 +1,27 @@
 export default{
 
-    initialize({dispatch, commit}){
+    initialize({dispatch, commit, state}, force = false){
         const local = localStorage.getItem("network")
-        if(local){
+        if(local && !force){
             commit("setNetwork", JSON.parse(local))
             const selected = JSON.parse(localStorage.getItem("selected"))
             commit("setBox", {property: "selected", value: false, n: selected.n, r: selected.r, b: selected.b})
-        }
+        } 
         else {
-            for(var i = 0; i<10; i++){
+            for(var i = 0; i<5; i++){
                 dispatch("addNetwork")
             }
         }
         commit("setBox", {property: "selected", value: true, n: 0, r: 0, b: 0})
+        if(force){
+            localStorage.setItem("network",JSON.stringify(state.network))
+            localStorage.setItem("selected",JSON.stringify(state.selected))
+        }
+    },
+
+    resetNetworks({commit, dispatch}){
+        commit("replaceNetwork", [])
+        dispatch("initialize", true)
     },
 
     initializeSymbolTable({commit}){

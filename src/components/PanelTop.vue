@@ -5,25 +5,25 @@
             <button @click="putSymbol('bottom', 'connect')" :disabled="!canPut"><span class="iconl-arrow-bottom"></span></button>
             <button @click="putSymbol('line', 'connect')" :disabled="!canPut" class="line"><span class="iconl-arrow-rigth"></span></button>
             <div class="contact">
-                <button @click="menu.contact = !menu.contact" :disabled="!canPut"><span class="iconl-contact"></span></button>
-                <ul v-show="menu.contact">
-                    <li @click="putSymbol('cno','contact')">NO</li>
-                    <li @click="putSymbol('cnc','contact')">NC</li>
-                    <li @click="putSymbol('n','contact')">N</li>
-                    <li @click="putSymbol('p','contact')">P</li>
+                <button @click="openMenu('contact')" :disabled="!canPut"><span class="iconl-contact"></span></button>
+                <ul v-show="menu.contact" class="submenu">
+                    <li @click="putSymbol('cno','contact')">-|  &nbsp;&nbsp;|-</li>
+                    <li @click="putSymbol('cnc','contact')">-| / |-</li>
+                    <li @click="putSymbol('n','contact')">-| N |-</li>
+                    <li @click="putSymbol('p','contact')">-| P |-</li>
                 </ul>
             </div>
             <div class="coil">
-            <button @click="menu.coil = !menu.coil" :disabled="!canPut||!canPutFinal"><span class="iconl-coil" ></span></button>
-                <ul v-show="menu.coil">
-                    <li @click="putSymbol('coil','coil')">-( )</li>
+            <button @click="openMenu('coil')" :disabled="!canPut||!canPutFinal"><span class="iconl-coil" ></span></button>
+                <ul v-show="menu.coil" class="submenu">
+                    <li @click="putSymbol('coil','coil')">-( &nbsp;&nbsp;)</li>
                     <li @click="putSymbol('reset','coil')">R</li>
                     <li @click="putSymbol('set','coil')">S</li>
                 </ul>
             </div>
             <div class="blocks">
-                <button @click="menu.blocks = !menu.blocks" :disabled="!canPut||!canPutFinal"><span class="iconl-blocks"></span></button>
-                <ul v-show="menu.blocks">
+                <button @click="openMenu('blocks')" :disabled="!canPut||!canPutFinal"><span class="iconl-blocks"></span></button>
+                <ul v-show="menu.blocks" class="submenu">
                     <li @click="putSymbol('ton', 'block')">TON</li>
                     <li @click="putSymbol('ctu', 'block')">CTU</li>
                 </ul>
@@ -32,7 +32,7 @@
         </div>
         <div v-show="view == 'symbol-table'" class="symbolTable-title">Tabla de Símbolos</div>
         <div class="menu">
-            <button @click="menu.principal = !menu.principal" class="menu-button"><span class="material-icons">menu</span></button>
+            <button @click="openMenu('principal')" class="menu-button"><span class="material-icons">{{menu.principal?'close':'menu'}}</span></button>
             <ul v-show="menu.principal" class="menu-items">
                     <li @click="changeView('symbol-table')" v-show="view != 'symbol-table'"><span class="material-icons" style="color: #2DACA1">backup_table</span>Tabla de Símbolos</li>
                     <li @click="changeView('ladder')" v-show="view != 'ladder'"><span class="material-icons" style="color: #2DACA1">description</span>Bloque de Programa</li>
@@ -41,6 +41,7 @@
             </ul>
         </div>
         <alert v-if="menu.alert" @close="menu.alert = false" @check="resetNetworks(true)">¿Desea vaciar todos los networks?</alert>
+        <div v-show="backMenu" class="backmenu" @click="closeMenu"></div>
     </div>
 </template>
 <script>
@@ -58,9 +59,20 @@ export default {
             principal: false,
             alert: false,
         })
-        
 
-        const closeMenu = () => menu.contact = menu.coil = menu.blocks = false
+        const openMenu = (option) => {
+            const value = menu[option]
+            closeMenu()
+            menu[option] = !value
+        }
+        
+        const backMenu = computed(() => {
+            return menu.contact || menu.coil || menu.blocks || menu.principal
+        })
+
+        const closeMenu = () => {
+            menu.contact = menu.coil = menu.blocks = menu.principal = false;
+        }
         
         const putSymbol = (symbol, type) => {
             closeMenu() 
@@ -118,7 +130,7 @@ export default {
         }
 
 
-        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, view, changeView, openPanelRun, run, resetNetworks}
+        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, view, changeView, openPanelRun, run, resetNetworks, backMenu, openMenu}
     },
 }
 </script>
@@ -184,25 +196,35 @@ export default {
 .panel-top .trash{
     color: rgb(187, 65, 65);
 }
-.panel-top ul{
-    width: 34px; 
+
+.contact, .coil, .blocks{
+    position: relative;
+}
+
+.submenu{
+    width: 50px; 
     position: absolute;
-    background-color: rgb(193, 243, 224);
+    top: 42px;
+    left: -6px;
+    background-color: rgb(24, 99, 99);
     list-style:none;
     border-left: 1px solid rgba(0, 0, 0, 0.137);
     border-right: 1px solid rgba(0, 0, 0, 0.137);
     border-top: 1px solid rgba(0, 0, 0, 0.137);
     z-index: 10;
+    color: rgb(202, 219, 213);
+    font-size: 18px;
+    user-select: none;
 }
-.panel-top li{
-    padding-top: 5px;
-    padding-bottom: 5px;
+.submenu li{
+    padding-top: 10px;
+    padding-bottom: 10px;
     width: 100%;
     text-align: center;
     cursor: pointer;
     border-bottom: 1px solid rgba(0, 0, 0, 0.137);
 }
-.panel-top li:active{
+.submenu li:hover{
     background-color: rgb(151, 202, 182);
 }
 
@@ -212,7 +234,8 @@ export default {
     right: 0;
     top: 50px;
     background: rgb(24, 99, 99);
-
+    position: absolute;
+    z-index: 10;
 }
 
 .panel-top .menu li{
@@ -224,11 +247,21 @@ export default {
     -webkit-tap-highlight-color: rgba(0,0,0,0);
     color: rgb(202, 202, 202);
     font-size: 20px;
+    user-select: none;
 }
 
 .panel-top .menu li span{
     font-size: 30px;
     margin-right: 4px;
+}
+
+.backmenu{
+    position: absolute;
+    width: 100%;
+    height: var(--vh);
+    z-index: 5;
+    top: 50px;
+    left: 0;
 }
 
 @media screen and (max-width: 768px) {

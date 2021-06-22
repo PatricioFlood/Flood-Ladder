@@ -5,7 +5,10 @@ export default{
         if(local && !force){
             commit("setNetwork", JSON.parse(local))
             const selected = JSON.parse(localStorage.getItem("selected"))
-            commit("setBox", {property: "selected", value: false, n: selected.n, r: selected.r, b: selected.b})
+            if(selected.r == -1)
+                commit("setAuxBox", {property: "selected", value: false, n: selected.n, ab: selected.b})
+            else
+                commit("setBox", {property: "selected", value: false, n: selected.n, r: selected.r, b: selected.b})
         } 
         else {
             for(var i = 0; i<5; i++){

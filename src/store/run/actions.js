@@ -30,7 +30,7 @@ export default{
             const stack = []
             var back = false
 
-            const processStack = (symbol, data) => {
+            const processStack = (symbol, data, data2) => {
 
                 var sentence = "if("
 
@@ -55,10 +55,21 @@ export default{
 
                 processLoop (stack, "&&")
 
-                sentence += ") tableImage." + data[0] + "[" + data[1] + "][" + data[3] + "] = "
+                sentence += ")"
 
-                if(symbol == "set") sentence += "true"
-                else sentence += "false"
+                if(symbol == "set" || symbol == "reset" || symbol == "coil"){
+                    sentence += "tableImage." + data[0] + "[" + data[1] + "][" + data[3] + "] = "
+
+                    if(symbol == "reset") sentence += "false"
+                    else sentence += "true"
+
+                    if(symbol == "coil")
+                        sentence += "; else tableImage." + data[0] + "[" + data[1] + "][" + data[3] + "] = false"
+                }
+                if(symbol == "ton-top"){
+                    sentence += "tableImage.T[" + data[1] + data[2] + "-37].count++; else tableImage.T[" + data[1] + data[2] + "-37].count = 0;"
+                    sentence += "tableImage.T[" + data[1] + data[2] + "-37].state = tableImage.T[" + data[1] + data[2] + "-37].count-1>=" + data2
+                }
 
                 logic.push(sentence)
             }
@@ -76,8 +87,8 @@ export default{
                         if(symbol == "line")
                             continue
 
-                        if(symbol == "set" || symbol == "reset"){
-                            processStack(symbol, data)
+                        if(symbol == "set" || symbol == "reset" || symbol == "ton-top" || symbol == "coil"){
+                            processStack(symbol, data, symbol == "ton-top"?rootState.network[n].row[row+1].box[box-1].data:null)
                             back = true
                             box--
                             continue
@@ -91,7 +102,12 @@ export default{
                         if(symbol == "cnc") 
                             sentence += "!"
                         
-                        sentence += "tableImage." + data[0] + "[" + data[1] + "][" + data[3] + "]"
+                        sentence += "tableImage." + data[0]
+
+                        if(data[0] == "T")
+                            sentence += "[" + data[1] + data[2] + "-37].state"
+                        else
+                            sentence += "[" + data[1] + "][" + data[3] + "]"
 
                         stack[actual].push(sentence)
 
@@ -124,7 +140,7 @@ export default{
             
             addRow(0, 0, rowLength, stack)
         }
-
+        console.log(logic)
         while(state.run){
             const tableImage = JSON.parse(JSON.stringify(state.stateTable))
 

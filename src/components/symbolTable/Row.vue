@@ -135,5 +135,6 @@ export default {
         border: none;
         background: rgba(0, 0, 0, 0.1);
         padding: 3px;
+        cursor: pointer;
     }
 </style>

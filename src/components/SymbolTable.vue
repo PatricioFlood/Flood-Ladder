@@ -79,8 +79,16 @@ export default {
     }
     .add{
         margin-top: 10px;
+        border: none;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        background-color: rgb(234, 242, 243);
     }
+    
     .delete{
+        cursor: pointer;
         color: rgb(172, 51, 51);
         border: none;
         background: rgba(0, 0, 0, 0.1);

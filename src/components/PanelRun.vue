@@ -11,11 +11,13 @@
                 :class="[
                 'push-button', 
                 {'red': /([rR][oO][jJ][Oo])|([nN][cC])/.test(button.comment) && !/[vV][eE][rR][dD][eE]/.test(button.comment)},
-                {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oO]/.test(button.comment)}
+                {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oO]/.test(button.comment)},
+                {'font16px': (button.symbol||button.direction).length > 8},
+                {'font14px': (button.symbol||button.direction).length > 11}
                 ]" 
                 @mousedown="setI(button)" @mouseup="resetI(button)" 
                 @touchstart.passive="setI(button)" @touchend.passive="resetI(button)">
-                {{button.symbol||button.direction}}
+                <p>{{button.symbol||button.direction}}</p>
                 <div class="nc" v-show="/[nN][cC]/.test(button.comment)">NC</div>
                 </div>
             </div>
@@ -27,8 +29,9 @@
                 {'red': /[rR][oO][jJ][OoaA]/.test(ligth.comment)},
                 {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oOaA]/.test(ligth.comment)},
                 {'blue': /[aA][zZ][uU][lL]/.test(ligth.comment)},
+                {'font13px': (ligth.symbol||ligth.direction).length > 9}
                 ]">
-                {{ligth.symbol||ligth.direction}}
+                <p>{{ligth.symbol||ligth.direction}}</p>
                 </div>
             </div>
         </div>
@@ -155,6 +158,12 @@ export default {
         overflow: hidden;
         user-select: none;
         position: relative;
+        padding: 5px;
+    }
+    .push-button p{
+        text-align: center;
+        width: 100%;
+        word-wrap: break-word;
     }
     .push-button .nc{
         position: absolute;
@@ -180,8 +189,8 @@ export default {
 
     .pilot-ligth{
         margin-top: 10px;
-        height: 80px;
-        width: 80px;
+        height: 85px;
+        width: 85px;
         border-radius: 100%;
         border: 10px solid rgb(10, 87, 10);
         background: rgb(5, 59, 5);
@@ -191,7 +200,13 @@ export default {
         color: rgb(214, 214, 214);
         overflow: hidden;
         user-select: none;
-        font-size: 13px;
+        font-size: 14px;
+        padding: 5px;
+    }
+    .pilot-ligth p{
+        text-align: center;
+        width: 100%;
+        word-wrap: break-word;
     }
 
     .pilot-ligth.on{
@@ -222,5 +237,14 @@ export default {
     .pilot-ligth.blue.on{
         border: 10px solid rgb(42, 79, 199);
         background: rgb(30, 117, 247);
+    }
+    .font16px{
+        font-size: 16px;
+    }
+    .font14px{
+        font-size: 14px;
+    }
+    .font13px{
+        font-size: 13px;
     }
 </style>

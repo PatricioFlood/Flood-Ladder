@@ -16,41 +16,52 @@ export default {
     setup(props){
         const store = useStore()
         var boxInput = ref(store.getters.box({property: "name", n: props.n, r: props.r, b: props.b}))
-        var inputValid = ref("")
+        var inputValid = ref("error")
         var data = ref(store.getters.box({property: "data", n: props.n, r: props.r, b: props.b}))
-
         const sendData = () => {
 
             if(!boxInput.value){
                 boxInput.value = "???"
                 inputValid.value = "error"
+                return
             }
 
-            inputValid.value = ""
-            
-            const regex = /^([QqIiVv][0-7]\.[0-7])|([tT]((3[7-9])|([4-5][0-9])|(6[0-3])))|([cC](([1-5][0-9])|(6[0-3])|([1-9])))$/
-
-            if(regex.test(boxInput.value)){
-                data.value = boxInput.value[0].toUpperCase() + boxInput.value.slice(1);
-                let symbol = store.getters.searchSymbolTableByDirection(data.value)
-                if(symbol){
-                    boxInput.value = symbol
-                } else if (boxInput.value[0] == "Q" || boxInput.value[0] == "I"){
-                    store.commit("addRowToSymbolTable")
-                    store.commit("setSymbolTable", {property: "direction", value: data.value, row: store.state.symbolTable.length-1})
-                } else {
-                    boxInput.value = data.value
-                }
-            } else {
-                data.value = store.getters.searchSymbolTable(boxInput.value)
-                if(!data.value){
+            if(props.box.symbol == "center-input"){
+                if(/^[1-9][0-9]{0,}$/.test(boxInput.value))
+                    data.value = boxInput.value
+                else {
                     inputValid.value = "error"
                     return
                 }
+            } else {
+                var regex = /^(([QqIiVv][0-7]\.[0-7])|([tT]((3[7-9])|([4-5][0-9])|(6[0-3])))|([cC](([1-5][0-9])|(6[0-3])|([1-9]))))$/
+                
+                if(regex.test(boxInput.value)){
+                    data.value = boxInput.value[0].toUpperCase() + boxInput.value.slice(1);
+                    let symbol = store.getters.searchSymbolTableByDirection(data.value)
+                    if(symbol){
+                        boxInput.value = symbol
+                    } else if (boxInput.value[0] == "Q" || boxInput.value[0] == "I"){
+                        store.commit("addRowToSymbolTable")
+                        store.commit("setSymbolTable", {property: "direction", value: data.value, row: store.state.symbolTable.length-1})
+                    } else {
+                        boxInput.value = data.value
+                    }
+                } else {
+                    data.value = store.getters.searchSymbolTable(boxInput.value)
+                    if(!data.value){
+                        if(props.box.symbol == "ton-top")
+                            store.commit("setBox", {property: "blockData2", value: "??? ms", n: props.n, r: props.r+1, b: props.b})
+                        inputValid.value = "error"
+                        return
+                    }
+                }
             }
-            
+
+            if(props.box.symbol == "ton-top" && data.value[0] == "T")
+                    store.commit("setBox", {property: "blockData2", value: "100 ms", n: props.n, r: props.r+1, b: props.b})
             inputValid.value = "correct"
-            store.commit("setBox", {property: "data", value: data, n: props.n, r: props.r, b: props.b})
+            store.commit("setBox", {property: "data", value: data.value, n: props.n, r: props.r, b: props.b})
             store.commit("setBox", {property: "name", value: boxInput.value, n: props.n, r: props.r, b: props.b})
             localStorage.setItem("network",JSON.stringify(store.state.network))
             localStorage.setItem("selected",JSON.stringify(store.state.selected))
@@ -67,7 +78,6 @@ export default {
                         store.commit("setSymbolTable", {property: "direction", value: data.value, row: store.state.symbolTable.length-1})
                     }
                 }
-                
         }
 
         const selectBox = () => {
@@ -81,7 +91,10 @@ export default {
 
         watch(() => store.state.symbolTable, () => {
             if(props.box.input){
-                actualizeData()
+                if(data.value != "???")
+                    inputValid.value = "correct"
+                if(props.box.symbol != "center-input")
+                    actualizeData()
             }
         }, {deep: true, })
 

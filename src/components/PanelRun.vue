@@ -80,7 +80,7 @@ export default {
         const resetI = async (button) => {
             window.navigator.vibrate(20);
             const value = /[nN][cC]/.test(button.comment)
-            await delay(100)
+            await delay(50)
             store.commit("setI", {byte: button.direction[1], bit: button.direction[3], value})
         }
 

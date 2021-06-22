@@ -17,8 +17,8 @@ export default{
         }
         commit("setBox", {property: "selected", value: true, n: 0, r: 0, b: 0})
         if(force){
-            localStorage.setItem("network",JSON.stringify(state.network))
-            localStorage.setItem("selected",JSON.stringify(state.selected))
+            localStorage.removeItem("network",JSON.stringify(state.network))
+            localStorage.removeItem("selected",JSON.stringify(state.selected))
         }
     },
 

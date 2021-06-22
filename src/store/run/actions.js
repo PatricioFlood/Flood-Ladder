@@ -66,9 +66,11 @@ export default{
                     if(symbol == "coil")
                         sentence += "; else tableImage." + data[0] + "[" + data[1] + "][" + data[3] + "] = false"
                 }
-                if(symbol == "ton-top"){
-                    sentence += "tableImage.T[" + data[1] + data[2] + "-37].count++; else tableImage.T[" + data[1] + data[2] + "-37].count = 0;"
-                    sentence += "tableImage.T[" + data[1] + data[2] + "-37].state = tableImage.T[" + data[1] + data[2] + "-37].count-1>=" + data2
+                else if(symbol == "ton-top"){
+                    sentence += "{if(!tableImage.T[" + data[1] + data[2] + "-37].count) tableImage.T[" + data[1] + data[2] + "-37].count = Date.now()+100;"
+                    sentence += "tableImage.T[" + data[1] + data[2] + "-37].state = Date.now() - tableImage.T[" + data[1] + data[2] + "-37].count >=" + data2 + "*100}"
+                    sentence += "else {tableImage.T[" + data[1] + data[2] + "-37].count = 0;"
+                    sentence += "tableImage.T[" + data[1] + data[2] + "-37].state = false}"
                 }
 
                 logic.push(sentence)
@@ -140,7 +142,7 @@ export default{
             
             addRow(0, 0, rowLength, stack)
         }
-        console.log(logic)
+
         while(state.run){
             const tableImage = JSON.parse(JSON.stringify(state.stateTable))
 
@@ -148,8 +150,8 @@ export default{
                 eval(sentence)
 
             commit("imageToStateTable", tableImage)
-
-            await delay(100)
+            console.log(Date.now())
+            await delay(50)
         }
 
         

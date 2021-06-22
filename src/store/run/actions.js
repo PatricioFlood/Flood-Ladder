@@ -58,19 +58,23 @@ export default{
                 sentence += ")"
 
                 if(symbol == "set" || symbol == "reset" || symbol == "coil"){
-                    sentence += "tableImage." + data[0] + "[" + data[1] + "][" + data[3] + "] = "
+                    const image = "tableImage." + data[0] + "[" + data[1] + "][" + data[3] + "]"
+
+                    sentence += image + "="
 
                     if(symbol == "reset") sentence += "false"
                     else sentence += "true"
 
                     if(symbol == "coil")
-                        sentence += "; else tableImage." + data[0] + "[" + data[1] + "][" + data[3] + "] = false"
+                        sentence += ";else" + image +"=false"
                 }
                 else if(symbol == "ton-top"){
-                    sentence += "{if(!tableImage.T[" + data[1] + data[2] + "-37].count) tableImage.T[" + data[1] + data[2] + "-37].count = Date.now()+100;"
-                    sentence += "tableImage.T[" + data[1] + data[2] + "-37].state = Date.now() - tableImage.T[" + data[1] + data[2] + "-37].count >=" + data2 + "*100}"
-                    sentence += "else {tableImage.T[" + data[1] + data[2] + "-37].count = 0;"
-                    sentence += "tableImage.T[" + data[1] + data[2] + "-37].state = false}"
+                    const byte = (parseInt(data[1] + data[2], 10) - 37).toString()
+                    const image = "tableImage.T["+ byte +"]"
+                    sentence += "{if(!" + image + ".count)"+ image +".count = Date.now()+100;"
+                    sentence += image + ".state = Date.now() - "+ image + ".count >=" + (parseInt(data2)*100).toString() + "}"
+                    sentence += "else{"+ image + ".count = 0;"
+                    sentence += image + ".state = false}"
                 }
 
                 logic.push(sentence)
@@ -107,7 +111,7 @@ export default{
                         sentence += "tableImage." + data[0]
 
                         if(data[0] == "T")
-                            sentence += "[" + data[1] + data[2] + "-37].state"
+                            sentence += "[" + (parseInt(data[1] + data[2], 10) - 37).toString() + "].state"
                         else
                             sentence += "[" + data[1] + "][" + data[3] + "]"
 
@@ -150,7 +154,6 @@ export default{
                 eval(sentence)
 
             commit("imageToStateTable", tableImage)
-            console.log(Date.now())
             await delay(50)
         }
 

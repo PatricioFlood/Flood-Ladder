@@ -66,7 +66,7 @@ export default{
                     else sentence += "true"
 
                     if(symbol == "coil")
-                        sentence += ";else" + image +"=false"
+                        sentence += ";else " + image +"=false"
                 }
                 else if(symbol == "ton-top"){
                     const byte = (parseInt(data[1] + data[2], 10) - 37).toString()

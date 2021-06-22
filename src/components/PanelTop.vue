@@ -79,23 +79,28 @@ export default {
             store.dispatch("putSymbol", {symbol, type})
         }
         const deleteSymbol = () => {
-            store.dispatch("deleteSymbol")
+            if(selected.value.type == "network")
+                store.commit("deleteNetwork")
+            else
+                store.dispatch("deleteSymbol")
         }
         const selected = computed(() => store.state.selected)
         const view = computed(() => store.state.currentView)
         const run = computed(() => store.state.run.panelRun)
 
         const canPut = computed(() => {
-            if(store.getters.box({property: "symbol"}) == "center-input")
+            if(store.getters.box({property: "symbol"}) == "center-input" || selected.value.type == 'network')
                 return false
-            return store.getters.selectedFinal !== null ? (selected.value.b <= store.getters.selectedFinal) : true
+            return store.getters.selectedFinal !== undefined ? (selected.value.b <= store.getters.selectedFinal) : true
         })
         const canPutFinal = computed(() => {
-            return selected.value.b > 0 ? (store.getters.selectedLast ? (selected.value.b >= store.getters.selectedLast) : true) : false
+            return selected.value.type != 'network' && selected.value.b > 0 ? (store.getters.selectedLast ? (selected.value.b >= store.getters.selectedLast) : true) : false
         })
         const canPutTop = computed(() => {
+            if(selected.value.type == 'network') return false
+
             var r = selected.value.r
-            if(r == -1) 
+            if(selected.value.type == 'aux') 
                 r = store.state.network[selected.value.n].row.length
             if(r > 0){
                 const final = store.getters.row({property: "final", n: selected.value.n, r: r-1})
@@ -105,8 +110,9 @@ export default {
                 return false
         })
         const canDelete = computed(() => {
+            if(selected.value.type == 'network') return true
             var symbol = store.getters.box({property: "symbol"})
-            return (selected.value.r != -1 && symbol != "center-input" && symbol != "start" && symbol != "continue")
+            return (selected.value.type == 'box' && symbol != "center-input" && symbol != "start" && symbol != "continue")
         })
 
         const changeView = (view) => {

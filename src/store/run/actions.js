@@ -87,7 +87,10 @@ export default{
                 while(!(back && stack.length == 0) && box < boxEnd){
                     const symbol = rootState.network[n].row[row].box[box].symbol
                     const data = rootState.network[n].row[row].box[box].data
-                    const connection = rootState.network[n].row[row].box[box].connection
+                    const connection = {
+                        top: rootState.network[n].row[row].box[box].connectionTop,
+                        bottom: rootState.network[n].row[row].box[box].connectionBottom,
+                    }
 
                     if(!back){
                         if(symbol == "line")
@@ -118,9 +121,9 @@ export default{
                         stack[actual].push(sentence)
 
                         if(connection.bottom){
-                            if(rootState.network[n].row[row+1].box[box].symbol !== ""){
+                            if(rootState.network[n].row[row+1].box[box].symbol){
                                 let b = box
-                                while((b>0 && !rootState.network[n].row[row+1].box[b-1].connection.top)) b--
+                                while((b>0 && !rootState.network[n].row[row+1].box[b-1].connectionTop)) b--
                                 addRow(row+1,b,box+1, stack[actual])
                             }
                             
@@ -131,11 +134,11 @@ export default{
                             back = false
                             row++
                             box++
-                        } else if (connection.bottom && rootState.network[n].row[row+1].box[box+1].connection.bottom){
+                        } else if (connection.bottom && rootState.network[n].row[row+1].box[box+1].connectionBottom){
                             row++
                         }
                         else {
-                            if(symbol == "")
+                            if(!symbol)
                                 row--
                             box--
                             stack.pop()

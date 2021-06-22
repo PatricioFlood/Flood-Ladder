@@ -1,6 +1,5 @@
 <template>
     <div class="ladder">
-        <div class="spreader-bar"></div>
         <div class="networks">
             <network v-for="(i,n) in network.length" :key="n" :n="n" :row="network[n].row" :auxRow="network[n].auxRow" />
             <button @click="addNetwork" class="add"><span class="material-icons">add</span></button>
@@ -24,10 +23,8 @@ export default {
 }
 </script>
 <style scoped>
-    .spreader-bar {
-        width: 5px;
-        flex-shrink: 0;
-        background-color: grey;
+    .ladder{
+        background-color: rgb(24, 121, 121);
     }
     .networks {
         width: 270px;
@@ -35,7 +32,7 @@ export default {
         flex-shrink: 0;
         display: flex;
         flex-direction: column;
-        background-color: rgb(237, 238, 232);
+        background-color: rgb(24, 121, 121);
         overflow: auto;
     }
 </style>

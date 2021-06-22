@@ -44,6 +44,8 @@ export default {
         flex-shrink: 0;
         height: var(--vh);
         background-color: rgb(24, 121, 121);
+        margin-right: 2px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     }
 li{
     display: flex;

@@ -1,5 +1,5 @@
 <template>
-    <div class="box" @click="selectBox" :class="[{'selected' : box.selected}, box.cssClass, {'symbol-top' : box.connection.top}, {'symbol-bottom' : box.connection.bottom}]">
+    <div class="box" @click="selectBox" :class="[{'selected' : box.selected}, box.cssClass, {'symbol-top' : box.connectionTop}, {'symbol-bottom' : box.connectionBottom}]">
         <input type="text" v-model="boxInput" v-if="box.input" @blur="sendData" @keyup.enter="sendData" :class="inputValid" spellcheck="false">
         <div class="block-data1" v-show="box.blockData1">{{box.blockData1}}</div>
         <div class="block-data2" v-show="box.blockData2">{{box.blockData2}}</div>
@@ -72,7 +72,7 @@ export default {
                 if(symbol){
                     boxInput.value = symbol
                 } else {
-                    boxInput.value = data.value
+                    boxInput.value = data.value||"???"
                     if (boxInput.value[0] == "Q" || boxInput.value[0] == "I"){
                         store.commit("addRowToSymbolTable")
                         store.commit("setSymbolTable", {property: "direction", value: data.value, row: store.state.symbolTable.length-1})
@@ -81,7 +81,7 @@ export default {
         }
 
         const selectBox = () => {
-            store.dispatch("select", {n: props.n, r: props.r, b: props.b})
+            store.dispatch("select", {n: props.n, r: props.r, b: props.b, type:"box"})
         }
 
         watch(() => props.box.input, () => {
@@ -91,7 +91,7 @@ export default {
 
         watch(() => store.state.symbolTable, () => {
             if(props.box.input){
-                if(data.value != "???")
+                if(data.value)
                     inputValid.value = "correct"
                 if(props.box.symbol != "center-input")
                     actualizeData()

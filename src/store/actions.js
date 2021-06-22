@@ -5,10 +5,13 @@ export default{
         if(local && !force){
             commit("setNetwork", JSON.parse(local))
             const selected = JSON.parse(localStorage.getItem("selected"))
-            if(selected.r == -1)
+            if(selected.type == 'aux')
                 commit("setAuxBox", {property: "selected", value: false, n: selected.n, ab: selected.b})
-            else
+            else if(selected.type == 'box')
                 commit("setBox", {property: "selected", value: false, n: selected.n, r: selected.r, b: selected.b})
+            else {
+                commit("setNetworkProperty", {property: "selected", value: false, n: selected.n})
+            }
         } 
         else {
             for(var i = 0; i<5; i++){
@@ -78,23 +81,29 @@ export default{
 
     },
 
-    select({state, commit}, {n, r, b, ab}){
-
-        if(state.select == {n, r, b} || state.select == {n: n, r: -1, b: ab}) 
+    select({state, commit}, {n, r, b, type}){
+        if((type == "box" && state.select == {n, r, b, type}) || (type == "aux" && state.select == {n, b, type}) || (type == "network" && state.select == {n, type})) 
             return
 
-        if(state.selected.r == -1)
+        if(state.selected.type == 'aux')
             commit("setAuxBox", {property: "selected", value: false, n: state.selected.n, ab: state.selected.b})
-        else
+        else if(state.selected.type == 'box')
             commit("setBox", {property: "selected", value: false, n: state.selected.n, r: state.selected.r, b: state.selected.b})
+        else{
+            commit("setNetworkProperty", {property: "selected", value: false, n: state.selected.n})
+        }
             
-        if(ab == undefined){
-            commit("setSelected", {n, r, b})
+        if(type == "box"){
+            commit("setSelected", {n, r, b, type})
             commit("setBox", {property: "selected", value: true, n, r, b})
         }
+        else if(type == "aux"){
+            commit("setSelected", {n, b, type})
+            commit("setAuxBox", {property: "selected", value: true, n, ab: b})
+        }
         else{
-            commit("setSelected", {n, r: -1, b: ab})
-            commit("setAuxBox", {property: "selected", value: true, n, ab})
+            commit("setSelected", {n, type})
+            commit("setNetworkProperty", {property: "selected", value: true, n})
         }
     },
 
@@ -104,7 +113,7 @@ export default{
         
         dispatch("resetConnection", {add: true, pos: "bottom", n, r, b})
 
-        if((b==0 || getters.box({property: "symbol", n, r: r+1, b}) == "") && getters.box({property: "symbol", n, r: r+1, b: b+1}) == "")
+        if((b==0 || !getters.box({property: "symbol", n, r: r+1, b})) && !getters.box({property: "symbol", n, r: r+1, b: b+1}))
             dispatch("setSymbol", {symbol: "continue", type: "connect", n, r: r+1, b: b+1})
 
         if(isReplaceable(getters.box({property: "symbol", n, r, b})) && !getters.connection({pos:"top", n, r, b}))
@@ -112,7 +121,7 @@ export default{
         
             
 
-        dispatch("select", {n, r: r+1, b: b+1})
+        dispatch("select", {n, r: r+1, b: b+1, type: "box"})
         localStorage.setItem("network",JSON.stringify(state.network))
         localStorage.setItem("selected",JSON.stringify(state.selected))
     },
@@ -123,13 +132,13 @@ export default{
         if(getters.box({property: "symbol", n, r: r, b: b+1}) == "continue")
             dispatch("resetSymbol", {n, r, b: b+1})
 
-        if((b==0 || getters.box({property: "symbol", n, r: r-1, b}) == "") && getters.box({property: "symbol", n, r: r-1, b: b+1}) == "")
+        if((b==0 || !getters.box({property: "symbol", n, r: r-1, b})) && !getters.box({property: "symbol", n, r: r-1, b: b+1}))
             dispatch("setSymbol", {symbol: "continue", type: "connect", n, r: r-1, b: b+1})
             
         if(isReplaceable(getters.box({property: "symbol", n, r, b})) && !getters.connection({pos:"bottom", n, r, b}))
             dispatch("putSymbol", {symbol: "line", type: "connect", n, r, b})
 
-        dispatch("select", {n, r: r-1, b: b+1}) 
+        dispatch("select", {n, r: r-1, b: b+1, type: "box"}) 
         localStorage.setItem("network",JSON.stringify(state.network))
         localStorage.setItem("selected",JSON.stringify(state.selected))
     },
@@ -295,7 +304,7 @@ export default{
         commit("setBox", {property: "blockData2", value: "", n, r, b})
         commit("setBox", {property: "input", value: false, n, r, b})
         commit("setBox", {property: "data", value: "", n, r, b})
-        commit("setBox", {property: "name", value: "???", n, r, b})
+        commit("setBox", {property: "name", value: "", n, r, b})
     },
 
     putSymbol({state, dispatch, commit, getters}, {symbol, type, n, r, b}){
@@ -307,7 +316,7 @@ export default{
         }
 
         // Si es una fila auxiliar agrega una fila.
-        if(r == -1){
+        if(r == undefined){
             dispatch("addRow", {n})
             r = state.network[n].row.length-1
         }
@@ -339,7 +348,7 @@ export default{
         // Completa la primer linea
         if(r==0){
             for(var i = b-1; i>=0; i--){
-                if(isContinue(getters.box({property: "symbol", n, r, b: i})) || getters.box({property: "symbol", n, r, b: i}) == "")
+                if(isContinue(getters.box({property: "symbol", n, r, b: i})) || !getters.box({property: "symbol", n, r, b: i}))
                     dispatch("setSymbol", {symbol: "line", type: "connect", n, r, b: i})
                 else
                     break
@@ -356,10 +365,10 @@ export default{
         // Determina el final o agrega un simbolo-continuar
         if(isFinal(symbol))
             commit("setRow", {property: "final", value: b, n, r})
-        else if(!getters.connection({pos: "top", n, r, b}) && !getters.connection({pos: "bottom", n, r, b}) && getters.box({property: "symbol", n, r, b: b+1})==""){
+        else if(!getters.connection({pos: "top", n, r, b}) && !getters.connection({pos: "bottom", n, r, b}) && !getters.box({property: "symbol", n, r, b: b+1})){
             commit("setRow", {property: "final", value: null, n, r})
             dispatch("setSymbol", {symbol: "continue", type: "connect", n, r, b: b+1})
-            dispatch("select", {n, r, b: b+1})   
+            dispatch("select", {n, r, b: b+1, type: "box"})
         }
 
         localStorage.setItem("network",JSON.stringify(state.network))
@@ -422,7 +431,7 @@ export default{
 
         //Si es una row secundaria y esta vacia y se borra el primer box, borra la row entera 
         if(b== 0 && r>0 && getters.row({property: "last", n, r}) == null){
-            dispatch("select", {n, r: r-1, b: 0})
+            dispatch("select", {n, r: r-1, b: 0, type:"box"})
             commit("deleteRow", {n, r})
         }
             

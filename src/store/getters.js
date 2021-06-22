@@ -1,7 +1,7 @@
 export default{
     box: (state) => ({property, n, r, b}) => {
         if(n == undefined){
-            if(state.selected.r > -1)
+            if(state.selected.type == 'box')
                 return state.network[state.selected.n].row[state.selected.r].box[state.selected.b][property]
             else
                 return ""
@@ -12,17 +12,20 @@ export default{
         return state.network[n].row[r][property]
     },
     connection: (state) => ({pos, n, r, b}) => {
-        const connection = state.network[n].row[r].box[b].connection
+        const connection = {
+            top: state.network[n].row[r].box[b].connectionTop,
+            bottom: state.network[n].row[r].box[b].connectionBottom
+        }
         if(pos == "all")
             return connection
         else
             return connection[pos]
     },
     selectedFinal: (state) => { 
-        return state.selected.r>-1?state.network[state.selected.n].row[state.selected.r].final:null
+        return state.selected.type=='box'?state.network[state.selected.n].row[state.selected.r].final:undefined
     },
     selectedLast: (state) => {
-        return state.selected.r>-1?state.network[state.selected.n].row[state.selected.r].last:null
+        return state.selected.type=='box'?state.network[state.selected.n].row[state.selected.r].last:undefined
     },
 
     searchSymbolTable: (state) => (symbol) => {

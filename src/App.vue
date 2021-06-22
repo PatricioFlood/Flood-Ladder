@@ -48,6 +48,7 @@ export default {
 .container {
     display: flex;
     width: 100%;
+    background-color: rgb(24, 121, 121);
 }
     .principal {
         height: var(--vh);

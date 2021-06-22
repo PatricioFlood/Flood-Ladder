@@ -14,12 +14,22 @@ export default{
             auxRow: []
         })
     },
+    deleteNetwork(state){
+        if(state.network.length < 2)
+            return
+        const n = state.selected.n
+        const newN = n>0?n-1:0
+        state.selected = {n: newN, type:"network"}
+        state.network[newN].selected = true
+        state.network.splice(n,1)
+        localStorage.setItem("network",JSON.stringify(state.network))
+        localStorage.setItem("selected",JSON.stringify(state.selected))
+    },
+
     addEmptyRow(state, n){
         state.network[n].row.push({
-            final: null, 
-            last: null, 
             box: []
-    })
+        })
     },
     replaceRow(state, {n,r,row}){
         state.network[n].row.splice(r,1,row)
@@ -38,27 +48,11 @@ export default{
     },
     addAuxRow(state, n){
         for(var i = 0; i<10; i++){
-            state.network[n].auxRow.push({
-                selected: false
-            })
+            state.network[n].auxRow.push({})
     }
     },
     addEmptyBox(state, {n, r}){
-        state.network[n].row[r].box.push({
-            symbol: "",
-            data: "", 
-            name: "???",
-            cssClass: "", 
-            input: false, 
-            selected: false, 
-            blockData1: "",
-            blockData2: "",
-            connection: {
-                top: false,
-                right: false,
-                bottom: false,
-            }
-        })
+        state.network[n].row[r].box.push({})
     },
 
     //Select
@@ -68,27 +62,38 @@ export default{
 
     //Row Setters
     setRow(state, {property, value, n, r}){
-        state.network[n].row[r][property] = value
+        if(value !== 0 && !value)
+            delete state.network[n].row[r][property]
+        else
+            state.network[n].row[r][property] = value
     },
 
     //Box setters
     setBox(state, {property, value, n, r, b}){
-        state.network[n].row[r].box[b][property] = value
+        if(value !== 0 && !value)
+            delete state.network[n].row[r].box[b][property]
+        else
+            state.network[n].row[r].box[b][property] = value
     },
 
     setAuxBox(state, {property, value, n, ab}){
-        state.network[n].auxRow[ab][property] = value
+        if(value !== 0 && !value)
+            delete state.network[n].auxRow[ab][property]
+        else
+            state.network[n].auxRow[ab][property] = value
     },
 
-    setConnection(state, {top, right, bottom, all, n, r, b}){
+    setNetworkProperty(state, {property, value, n}){
+        state.network[n][property] = value
+    },
+
+    setConnection(state, {top, bottom, all, n, r, b}){
         if(all != undefined)
-            bottom = top = right = all
+            bottom = top = all
         if(top != undefined)
-            state.network[n].row[r].box[b].connection.top = top
-        if(right != undefined)
-            state.network[n].row[r].box[b].connection.right = right
+            state.network[n].row[r].box[b].connectionTop = top
         if(bottom != undefined)
-            state.network[n].row[r].box[b].connection.bottom = bottom
+            state.network[n].row[r].box[b].connectionBottom = bottom
     },
 
     //symbolTable

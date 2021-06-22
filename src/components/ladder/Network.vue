@@ -1,6 +1,6 @@
 <template>
-    <div class="network">
-        <p>Network {{n+1}}</p>
+    <div class="network" :class="{'selected': network.selected}">
+        <p @click="selectNetwork(n)">Network {{n+1}}</p>
         <div class="row" v-for="(i,r) in  row.length" :key="r">
             <box v-for="(i,b) in row[r].box.length" :key="b" :n="n" :r="r" :b="b" :box="row[r].box[b]"/>
         </div>
@@ -14,15 +14,21 @@
 <script>
 import Box from "@/components/ladder/Box.vue"
 import {useStore} from "vuex"
+import { computed } from '@vue/runtime-core'
 export default{
     props: {n: Number, row: Array, auxRow: Array},
     components: {Box},
-    setup(){
+    setup(props){
         const store = useStore()
-        const selectAux = (n,ab) => {
-            store.dispatch("select", {n, ab})
+        const selectAux = (n,b) => {
+            store.dispatch("select", {n, b, type:"aux"})
         }
-        return{selectAux}
+        const selectNetwork = (n) => {
+            store.dispatch("select", {n, type:"network"})
+        }
+        const network = computed(() => store.state.network[props.n])
+
+        return{selectAux, selectNetwork, network}
     }
 }
 </script>
@@ -35,9 +41,12 @@ export default{
         .network p{
             padding: 0;
             margin: 0;
-            margin-left: 10px;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            padding-left: 10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            cursor: pointer;
+            position: relative;
+            z-index: 1
         }
             .row{
                 height: 60px;
@@ -63,4 +72,10 @@ export default{
                     outline: 1px solid black;
                     outline-offset: -1px;
                 }
+    .network p:hover{
+        outline: 1px solid rgba(0, 0, 0, 0.2);
+    }
+    .network.selected{
+        border: 1px solid black;
+    }
 </style>

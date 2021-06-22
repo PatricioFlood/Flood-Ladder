@@ -6,7 +6,7 @@ import run from "./run/index.js"
 
 export default createStore({
   state: {
-    selected: {n: 0, r: 0, b: 0},
+    selected: {n: 0, r: 0, b: 0, type: 'box'},
     network: [],
     currentView: "ladder",
     symbolTable: [],

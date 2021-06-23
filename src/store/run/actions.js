@@ -196,7 +196,7 @@ export default{
             return false
         }
 
-        const S7compiler = (n, row, boxInit, boxEnd) => {
+        const S7compiler = (n, row, boxInit, boxEnd, init = true) => {
             for(let b = boxInit; b<=boxEnd; b++){
                 const symbol = rootState.network[n].row[row].box[b].symbol
                 const data = rootState.network[n].row[row].box[b].data
@@ -218,7 +218,7 @@ export default{
                         b = newBoxEnd
                     } else {
                         line.push("LPS")
-                        S7compiler(n, row, b, boxEnd)
+                        S7compiler(n, row, b, boxEnd, false)
                         line.push("LPP")
                         b = b - 1
                         row = row + 1 
@@ -228,7 +228,7 @@ export default{
                 }
                 if(symbol == "cnc" || symbol == "cno"){
 
-                    line.push((b==boxInit?"LD":"A") + (symbol=="cnc"?"N ":" ") + data)
+                    line.push(((b==boxInit && init)?"LD":"A") + (symbol=="cnc"?"N ":" ") + data)
 
                 } else if(symbol == "coil" || symbol == "set" || symbol == "reset"){
                     line.push((symbol=="coil"?"= ":symbol=="set"?"S ":"R ") + data + (symbol=="coil"?"":", 1"))
@@ -257,10 +257,6 @@ export default{
             }
         }
 
-        var stack = []
-        var auxStack = []
-        const logic = []
-
         const getTableImage = (dir) => {
             var image = "tableImage." + dir[0]
             if(dir[0] == "Q" || dir[0] == "I" || dir[0] == "V"){
@@ -288,29 +284,62 @@ export default{
         const pushLogic = (funct, dir, param) => {
             dir = dir.replace(",","")
             var image = getTableImage(dir)
-            var sentence = "if(" + stack[stack.length-1] + ")"
+            var sentence = ""
+            const last = stack[stack.length-1][stack[stack.length-1].length-1]
+            if(last != ";"){
+                stackElse.push("")
+                sentence += "){"
+            }
             if(funct == "S" || funct == "R" || funct == "="){
                 if(dir[0] == "T" || dir[0] == "C")
                     image += ".state"
                 sentence += image + "="
                 sentence += funct=="R"?"false":"true"
                 if(funct == "=")
-                    sentence += ";else " + image + "=false"
+                    stackElse[stackElse.length-1] += image + "=false"
             }
             if(funct == "TON"){
-                sentence += "{if(!" + image + ".count)"+ image +".count = Date.now()+100;"
+                sentence += "if(!" + image + ".count){"+ image +".count = Date.now()+100;"
                 sentence += image + ".state = Date.now() - "+ image + ".count >=" + (parseInt(param)*100).toString() + "}"
-                sentence += "else{"+ image + ".count = 0;"
-                sentence += image + ".state = false}"
+                stackElse[stackElse.length-1] += image + ".count = 0;" + image + ".state = false;"
             }
-
-            logic.push(sentence)
+            stack[stack.length-1] += sentence + ";"
         }
+
+        var stack = []
+        var stackElse = []
+        const logic = []
+
+        const getElse = () => {
+            var sentenceElse = "}"
+            var popElse = stackElse.pop()
+            if(popElse){
+                sentenceElse += "else{" + popElse + "}"
+            } 
+            return sentenceElse + ";"
+        }
+
+        const getAllElse = () => {
+            var sentenceElse = ""
+            while(stackElse.length > 0){
+                sentenceElse += getElse()
+            }
+            return sentenceElse
+        }
+
+        // let awl = ""
+        // for(let l of line){
+        //     awl += l + "\n"
+        // }
+        // console.log(awl)
 
         for(let l of line){
             if(l.includes("Network")){
+                if(stack.length > 0){
+                    logic.push("if(" + stack[0] + getAllElse())
+                }
                 stack = []
-                auxStack = []
+                stackElse = []
             } else {
                 const split = l.split(" ")
                 const func = split[0]
@@ -322,7 +351,11 @@ export default{
                     stackContact(dir, func == "LDN")
                 }
                 else if(func == "A" || func == "AN"){
-                    stack[stack.length-1] += "&&"
+                    const last = stack[stack.length-1][stack[stack.length-1].length-1]
+                    if(last == undefined ||last == "{" || last == ";")
+                        stack[stack.length-1] += "if("
+                    else
+                        stack[stack.length-1] += "&&"
                     stackContact(dir, func == "AN")
                 }
                 else if(func == "O" || func == "ON"){
@@ -332,20 +365,33 @@ export default{
                 else if(func == "ALD" || func == "OLD"){
                     const second = stack.pop()
                     const first = stack.pop()
-                    stack.push("(" + first + ")" + (func == "ALD"?"&&":"||") + "(" + second + ")")
+                    const last = first[first.length-1]
+                    if(func == "ALD" && last == ";"){
+                        stack.push( first + "if(" + second + getElse())
+                    }
+                    else
+                        stack.push("(" + first + ")" + (func == "ALD"?"&&":"||") + "(" + second + ")")
                 }
                 else if(func == "LPS"){
-                    auxStack.push(stack[stack.length-1])
+                    stack.push("")
                 }
                 else if(func == "LPP"){
-                    stack.push(auxStack.pop())
+                    const second = stack.pop() + getElse()
+                    const first = stack.pop()
+                    if(first[first.length-1] == ";"){
+                        stack.push(first + second)
+                    } else {
+                        stack.push(first + "){" + second)
+                        stackElse.push("")
+                    }
                 }
                 else if(func == "S" || func == "R" || func == "=" || func == "TON" || func == "CTU"){
                     pushLogic(func, dir, param)
                 }
-                    
             }
         }
+
+        logic.push("if(" + stack[0] + getAllElse())
 
         while(state.run){
             const tableImage = JSON.parse(JSON.stringify(state.stateTable))

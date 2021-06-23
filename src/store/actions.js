@@ -193,10 +193,10 @@ export default{
         localStorage.setItem("selected",JSON.stringify(state.selected))
     },
 
-    setLast({getters, commit}, {n, r, b, force=false}){
-        if(force || (getters.row({property: "last", n, r}) < b && isReplaceable(getters.box({property: "symbol", n, r ,b})) ))
-            commit("setRow", {property: "last", value: b, n, r})
-    },
+    // setLast({getters, commit}, {n, r, b, force=false}){
+    //     if(force || (getters.row({property: "last", n, r}) < b && isReplaceable(getters.box({property: "symbol", n, r ,b})) ))
+    //         commit("setRow", {property: "last", value: b, n, r})
+    // },
 
     resetConnection({commit}, {add, pos, n, r, b}){
         var rTop = r
@@ -359,7 +359,7 @@ export default{
         dispatch("setSymbol", {symbol, type, n, r, b})
 
         //Setea el last
-        if(b > getters.row({property: "last", n, r}))
+        if(getters.row({property: "last", n, r}) == undefined || b > getters.row({property: "last", n, r}))
             commit("setRow", {property: "last", value: b, n, r})
         
         // Determina el final o agrega un simbolo-continuar
@@ -430,7 +430,7 @@ export default{
         }
 
         //Si es una row secundaria y esta vacia y se borra el primer box, borra la row entera 
-        if(b== 0 && r>0 && getters.row({property: "last", n, r}) == null){
+        if(b== 0 && r>0 && getters.row({property: "last", n, r}) == undefined){
             dispatch("select", {n, r: r-1, b: 0, type:"box"})
             commit("deleteRow", {n, r})
         }

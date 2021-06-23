@@ -65,7 +65,7 @@ export default {
                 const value = /[nN][cC]/.test(button.comment)
                     store.commit("setI", {byte: button.direction[1], bit: button.direction[3], value})
             }
-            store.dispatch("runLadder")
+            store.dispatch("runLadder2")
         }
 
         const stopLadder = () => {

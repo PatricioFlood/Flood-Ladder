@@ -18,7 +18,10 @@ export default {
         const addNetwork = () => {
             store.dispatch("addNetwork")
         }
-        return{network, addNetwork}
+        const runLadder2 = () => {
+            store.dispatch("runLadder2")
+        }
+        return{network, addNetwork, runLadder2}
     },
 }
 </script>

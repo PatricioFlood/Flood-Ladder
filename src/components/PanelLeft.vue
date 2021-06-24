@@ -5,6 +5,7 @@
             <li @click="changeView('ladder')" v-show="view != 'ladder'"><span class="material-icons" style="color: #2DACA1">description</span>Bloque de Programa</li>
             <li @click="openPanelRun()" v-show="!run"><span class="material-icons" style="color: #6BB464">play_arrow</span>Simulación</li>
             <li @click="resetNetworks()" v-show="view == 'ladder'"><span class="material-icons" style="color: #A03C3C">delete</span>Vaciar Networks</li>
+            <li @click="generateFile()"><span class="material-icons" style="color: #428DD4">download</span>Descargar Archivo</li>
         </ul>
         <alert v-if="alert" @close="alert = false" @check="resetNetworks(true)">¿Desea vaciar todos los networks?</alert>
     </div>
@@ -34,7 +35,12 @@ export default {
         const changeView = (view) => {
             store.commit("setView", view)
         }
-        return{changeView, view, run, openPanelRun, resetNetworks, alert}
+
+        const generateFile = () =>{
+            store.dispatch("generateS7File")
+        }
+
+        return{changeView, view, run, openPanelRun, resetNetworks, alert, generateFile}
     }
 }
 </script>

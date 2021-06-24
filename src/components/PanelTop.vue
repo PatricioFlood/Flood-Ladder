@@ -38,6 +38,7 @@
                     <li @click="changeView('ladder')" v-show="view != 'ladder'"><span class="material-icons" style="color: #2DACA1">description</span>Bloque de Programa</li>
                     <li @click="openPanelRun()" v-show="!run"><span class="material-icons" style="color: #6BB464">play_arrow</span>Simulación</li>
                     <li @click="resetNetworks()" v-show="view == 'ladder'"><span class="material-icons" style="color: #A03C3C">delete</span>Vaciar Networks</li>
+                    <li @click="generateFile()"><span class="material-icons" style="color: #428DD4">download</span>Descargar Archivo</li>
             </ul>
         </div>
         <alert v-if="menu.alert" @close="menu.alert = false" @check="resetNetworks(true)">¿Desea vaciar todos los networks?</alert>
@@ -135,8 +136,12 @@ export default {
             }
         }
 
+        const generateFile = () =>{
+            store.dispatch("generateS7File")
+        }
 
-        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, view, changeView, openPanelRun, run, resetNetworks, backMenu, openMenu}
+        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, 
+        view, changeView, openPanelRun, run, resetNetworks, backMenu, openMenu, generateFile}
     },
 }
 </script>
@@ -264,7 +269,7 @@ export default {
 .backmenu{
     position: absolute;
     width: 100%;
-    height: var(--vh);
+    height: calc(var(--vh) - 50px);
     z-index: 5;
     top: 50px;
     left: 0;

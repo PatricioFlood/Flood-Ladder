@@ -6,6 +6,7 @@
             <li @click="openPanelRun()" v-show="!run"><span class="material-icons" style="color: #6BB464">play_arrow</span>Simulación</li>
             <li @click="resetNetworks()" v-show="view == 'ladder'"><span class="material-icons" style="color: #A03C3C">delete</span>Vaciar Networks</li>
             <li @click="generateFile()"><span class="material-icons" style="color: #428DD4">download</span>Descargar Archivo</li>
+            <!-- <li @click="savePDF()"><span class="material-icons" style="color: #428DD4">download</span>Descargar PDF</li> -->
         </ul>
         <alert v-if="alert" @close="alert = false" @check="resetNetworks(true)">¿Desea vaciar todos los networks?</alert>
     </div>
@@ -39,6 +40,27 @@ export default {
         const generateFile = () =>{
             store.dispatch("generateS7File")
         }
+
+        // const savePDF = () => {
+        //     let stylesHtml = '';
+        //     for (const node of [...document.querySelectorAll('link[rel="stylesheet"], style')]) {
+        //         stylesHtml += node.outerHTML;
+        //     }
+
+        //     var divContents = document.getElementById("networks").innerHTML;
+        //     var printWindow = window.open('', '', 'height=400,width=800');
+        //     printWindow.document.write("<!DOCTYPE html><html><head>")
+        //     printWindow.document.write(stylesHtml)
+        //     printWindow.document.write('<title>Ladder</title>');
+        //     printWindow.document.write('</head><body>');
+        //     printWindow.document.write(divContents);
+        //     printWindow.document.write('</body></html>');
+        //     printWindow.document.close();
+        //     printWindow.focus();
+        //     printWindow.print();
+        //     printWindow.close();
+            
+        // }
 
         return{changeView, view, run, openPanelRun, resetNetworks, alert, generateFile}
     }

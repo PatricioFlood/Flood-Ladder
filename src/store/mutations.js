@@ -123,6 +123,43 @@ export default{
         state.symbolTable = value
     },
     
+    orderSymbolTable(state){
+        state.symbolTable.sort(
+            (a,b) => {
+                const indexA = [0,0,0]
+                const indexB = [0,0,0]
+                const setIndex = (val, index) =>{
+                    if(!val){
+                        index[0] = 9999
+                        return
+                    } 
+                    switch(val[0]){
+                        case "T":
+                            index[0] = 3
+                            break
+                        case "V":
+                            index[0] = 2
+                            break
+                        case "Q":
+                            index[0] = 1
+                            break
+                        case "I":
+                            index[0] = 0
+                            break
+                    }
+                    const split = val.substring(1).split(".")
+                    index[1] = split[0]?parseInt(split[0]):9999
+                    index[2] = split[1]?parseInt(split[1]):9999
+                }
+                setIndex(a.direction, indexA)
+                setIndex(b.direction, indexB)
+                return  indexA[0] < indexB[0] ? -1 : indexA[0] > indexB[0] ? 1 : 
+                        indexA[1] < indexB[1] ? -1 : indexA[1] > indexB[1] ? 1 : 
+                        indexA[2] < indexB[2] ? -1 : indexA[2] > indexB[2] ? 1 : 0
+            }
+        )
+    },
+
     setNetwork(state,value){
         state.network = value
     }

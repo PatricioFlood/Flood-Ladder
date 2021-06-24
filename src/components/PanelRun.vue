@@ -25,13 +25,31 @@
                 <div v-for="ligth of ligths" :key="ligth.direction"
                 :class="[
                 'pilot-ligth',
-                {'on': Q[ligth.direction[1]][ligth.direction[3]]},
+                {'on': Q[ligth.direction.substring(1).split('.')[0]][ligth.direction.substring(1).split('.')[1]]},
                 {'red': /[rR][oO][jJ][OoaA]/.test(ligth.comment)},
                 {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oOaA]/.test(ligth.comment)},
                 {'blue': /[aA][zZ][uU][lL]/.test(ligth.comment)},
                 {'font13px': (ligth.symbol||ligth.direction).length > 9}
                 ]">
                 <p>{{ligth.symbol||ligth.direction}}</p>
+                </div>
+            </div>
+            <div class="table">
+                <div class="variables" v-if="variables.length>0">
+                    <div class="tableTitle">Variables</div>
+                    <div>Direccion</div><div>Estado</div>
+                    <template v-for="variable of variables" :key="variable.direction">
+                        <div>{{variable.direction}}</div><div>{{V[variable.direction.substring(1).split('.')[0]][variable.direction.substring(1).split('.')[1]]?1:0}}</div>
+                    </template>
+                </div>
+                <div class="timers" v-if="timers.length>0">
+                    <div class="tableTitle2">Temporizadores</div>
+                    <div>Direccion</div><div>Tiempo</div><div>Estado</div>
+                    <template v-for="timer of timers" :key="timer.direction">
+                        <div>{{timer.direction}}</div>
+                        <div>{{T[parseInt(timer.direction.substring(1))-37].count}}</div>
+                        <div>{{T[parseInt(timer.direction.substring(1))-37].state?1:0}}</div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -48,17 +66,19 @@ export default {
 
         const store = useStore()
 
-        const Q = computed(() => store.state.run.stateTable.Q)
+        
 
         const run = computed(() => store.state.run.run)
 
-        const pushButtons = computed(() => {
-            return store.state.symbolTable.filter(row => row.direction && row.direction[0] == "I").sort(((a, b) => a.direction > b.direction || -1))
-        })
-
-        const ligths = computed(() => {
-            return store.state.symbolTable.filter(row => row.direction && row.direction[0] == "Q").sort(((a, b) => a.direction > b.direction || -1))
-        })
+        const pushButtons = computed(() => store.state.symbolTable.filter(row => row.direction && row.direction[0] == "I"))
+        const ligths = computed(() =>store.state.symbolTable.filter(row => row.direction && row.direction[0] == "Q"))
+        const Q = computed(() => store.state.run.stateTable.Q)
+        const timers = computed(() => store.state.symbolTable.filter(row => row.direction && row.direction[0] == "T"))
+        const T = computed(() => store.state.run.stateTable.T)
+        const variables = computed(() => store.state.symbolTable.filter(row => row.direction && row.direction[0] == "V"))
+        const V = computed(() => store.state.run.stateTable.V)
+        const counters = computed(() => store.state.symbolTable.filter(row => row.direction && row.direction[0] == "C"))
+        const C = computed(() => store.state.run.stateTable.C)
 
         const runLadder = () => {
             for(let button of pushButtons.value){
@@ -88,7 +108,7 @@ export default {
             store.commit("setPanelRun", false)
         }
 
-        return{Q, setI, resetI, run, runLadder, stopLadder, closePanel, pushButtons, ligths}
+        return{Q, setI, resetI, run, runLadder, stopLadder, closePanel, pushButtons, ligths, timers, T, counters, C, variables, V}
     },
 }
 </script>
@@ -101,6 +121,43 @@ export default {
         max-height: 50%;
         padding-top: 2px;
     }
+    .table{
+        display: flex;
+        margin-top: 10px;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+    }
+    .variables{
+        display: grid;
+        width: 200px;
+        grid-template-columns: repeat(2, 1fr);
+        text-align: center;
+        border: 1px solid black;
+    }
+    .variables div{
+        border: 1px solid black;
+        padding: 2px;
+    }
+    .timers{
+        margin-left: 10px;
+        margin-right: 10px;
+        display: grid;
+        width: 200px;
+        grid-template-columns: repeat(3, 1fr);
+        text-align: center;
+        border: 1px solid black;
+    }
+    .timers div{
+        border: 1px solid black;
+        padding: 2px;
+    }
+    .tableTitle{
+        grid-column: 1 / 3;
+    }
+    .tableTitle2{
+        grid-column: 1 / 4;
+    }
     .runstop{
         display: flex;
         justify-content: space-between;
@@ -109,9 +166,11 @@ export default {
     }
     .content{
         display: flex;
-        flex-direction: column;
         overflow: auto;
         padding: 10px;
+        align-items: center;
+        justify-content: space-around;
+        flex-wrap: wrap;
     }
     .runstop span{
         font-size: 35px;
@@ -136,12 +195,11 @@ export default {
     }
     .buttons, .ligths{
         display: flex;
-        justify-content: space-evenly;
-        flex-wrap: wrap;
-    }
-    .ligths{
-        flex-grow: 1;
+        justify-content: space-around;
+        align-items: center;
         align-content: center;
+        flex-wrap: wrap;
+        flex-grow: 1;
     }
     .push-button{
         height: 100px;

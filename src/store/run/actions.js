@@ -44,7 +44,6 @@ export default{
                 const symbol = rootState.network[n].row[row].box[b].symbol
                 const data = rootState.network[n].row[row].box[b].data
                 const bottom = rootState.network[n].row[row].box[b].connectionBottom
-
                 if(b != boxInit && b != boxEnd && rootState.network[n].row[row].box[b-1].connectionBottom && rootState.network[n].row[row+1].box[b].symbol){
                     let hasTop = false
                     let newBoxEnd = b
@@ -164,9 +163,10 @@ export default{
                     stackElse[stackElse.length-1] += image + "=false"
             }
             if(funct == "TON"){
-                sentence += "if(!" + image + ".count){"+ image +".count = Date.now()+100;"
-                sentence += image + ".state = Date.now() - "+ image + ".count >=" + (parseInt(param)*100).toString() + "}"
-                stackElse[stackElse.length-1] += image + ".count = 0;" + image + ".state = false;"
+                sentence += "if(!" + image + ".init){"+ image +".init = Date.now()}"
+                sentence += image + ".count = Math.round((Date.now() - "+ image + ".init)/100);"
+                sentence += image + ".state =" + image + ".count >=" + (parseInt(param)-1).toString() + ";"
+                stackElse[stackElse.length-1] += image + ".count = 0;" + image + ".init = 0;" + image + ".state = false;"
             }
             stack[stack.length-1] += sentence + ";"
         }
@@ -247,6 +247,9 @@ export default{
         }
 
         logic.push("if(" + stack[0] + getAllElse())
+
+        console.log(logic)
+
 
         while(state.run){
             const tableImage = JSON.parse(JSON.stringify(state.stateTable))

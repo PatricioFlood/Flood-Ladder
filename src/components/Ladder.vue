@@ -1,6 +1,6 @@
 <template>
     <div class="ladder">
-        <div class="networks">
+        <div class="networks" id="networks">
             <network v-for="(i,n) in network.length" :key="n" :n="n" :row="network[n].row" :auxRow="network[n].auxRow" />
             <button @click="addNetwork" class="add"><span class="material-icons">add</span></button>
         </div>

@@ -34,8 +34,20 @@ export default{
         const local = localStorage.getItem("symbolTable")
         if(local)
             commit("setSymbolTableFromLocal", JSON.parse(local))
-        else
-            commit("addRowToSymbolTable")
+    },
+
+    deleteRowByDirection({state, commit}, direction){
+        var deleteRow = -1
+        var i = 0
+        for(let row of state.symbolTable){
+            if(row.direction == direction){
+                deleteRow = i
+                break
+            }
+            i++
+        }  
+        if(deleteRow >= 0)
+            commit("deleteRowSymbolTable", deleteRow)
     },
 
     addNetwork({commit, state, dispatch}){
@@ -380,6 +392,7 @@ export default{
         const symbol = getters.box({property: "symbol", n, r, b})
         const symbolBefore = b>0 ? getters.box({property: "symbol", n, r, b: b-1}) : ""
         const connection = getters.connection({pos: "all", n, r, b})
+        const data = getters.box({property: "data", n, r, b})
 
         if(isContinue(symbol) || symbol == "center-input" || symbol == "ton-bottom")
             return
@@ -396,6 +409,10 @@ export default{
             dispatch("resetSymbol", {n, r: r+2, b})
             dispatch("deleteSymbol", {n, r: r+2, b: b-1})
         }
+
+        if(data && getters.searchSymbolTableByDirection(data) == data)
+            dispatch("deleteRowByDirection", data)
+        
         
         dispatch("resetSymbol", {n, r, b})
 
@@ -421,7 +438,7 @@ export default{
         if(getters.row({property: "last", n, r}) == b){
             var i = b-1
             for(i; i>=0; i--){
-                if(isReplaceable(symbol))
+                if(!isReplaceable(symbol))
                     break
             }
             if(i == -1)

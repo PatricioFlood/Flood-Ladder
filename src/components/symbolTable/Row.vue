@@ -72,6 +72,7 @@ export default {
                 }
             }
             store.commit("setSymbolTable", {property, value: table[property], row: props.row})
+            store.commit("orderSymbolTable")
         }
         
         watch(() => store.state.symbolTable[props.row], () => {

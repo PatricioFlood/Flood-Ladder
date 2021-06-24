@@ -41,9 +41,10 @@ export default {
                     let symbol = store.getters.searchSymbolTableByDirection(data.value)
                     if(symbol){
                         boxInput.value = symbol
-                    } else if (boxInput.value[0] == "Q" || boxInput.value[0] == "I"){
+                    } else if (/^[QITVC]/.test(boxInput.value)){
                         store.commit("addRowToSymbolTable")
                         store.commit("setSymbolTable", {property: "direction", value: data.value, row: store.state.symbolTable.length-1})
+                        store.commit("orderSymbolTable")
                     } else {
                         boxInput.value = data.value
                     }
@@ -73,9 +74,10 @@ export default {
                     boxInput.value = symbol
                 } else {
                     boxInput.value = data.value||"???"
-                    if (boxInput.value[0] == "Q" || boxInput.value[0] == "I"){
+                    if (/^[QITVC]/.test(boxInput.value)){
                         store.commit("addRowToSymbolTable")
                         store.commit("setSymbolTable", {property: "direction", value: data.value, row: store.state.symbolTable.length-1})
+                        store.commit("orderSymbolTable")
                     }
                 }
         }

@@ -87,6 +87,8 @@ export default {
                 }
         }
 
+        sendData()
+
         const selectBox = () => {
             store.dispatch("select", {n: props.n, r: props.r, b: props.b, type:"box"})
         }

@@ -1,27 +1,15 @@
 module.exports = {
-    publicPath: '/',
-    chainWebpack: config => {
-      config
-          .plugin('html')
-          .tap(args => {
-              args[0].title = "Flood Ladder";
-              return args;
-          })
-    },
+    publicPath: '/ladder',
     pwa: {
-      name: 'Flood Ladder',
+      name: 'Ladder Beta',
       themeColor: '#186363',
       manifestOptions: {
         background_color: "#6CABD4",
         description: "Programacion Ladder",
         display: "fullscreen",
         short_name: "Ladder",
-        start_url: "/",
+        start_url: "/ladder/",
         prefer_related_applications: false
-      },
-      workboxOptions: {
-        skipWaiting: true,
-        exclude: [/CNAME/, /css\.map$/]
       }
     }
   }

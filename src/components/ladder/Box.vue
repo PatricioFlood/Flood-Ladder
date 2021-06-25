@@ -4,12 +4,17 @@
         <div class="block-data1" v-show="box.blockData1">{{box.blockData1}}</div>
         <div class="block-data2" v-show="box.blockData2">{{box.blockData2}}</div>
         <div class="box-background"></div>
+        <div class="boxActive" v-if="active"></div>
+        <div class="boxActiveAfter" v-if="activeAfter"></div>
+        <div class="boxActiveBefore" v-if="activeBefore"></div>
+        <div class="boxActiveBottom" v-if="activeAfter && box.connectionBottom"></div>
+        <div class="boxActiveTop" v-if="activeAfter && box.connectionTop"></div>
     </div>
 </template>
 <script>
 import { ref } from '@vue/reactivity'
 import {useStore} from "vuex"
-import { watch } from '@vue/runtime-core'
+import { computed, watch } from '@vue/runtime-core'
 
 export default {
     props: {n: Number, r: Number, b: Number, box: Object},
@@ -100,7 +105,26 @@ export default {
             }
         }, {deep: true, })
 
-        return {boxInput,selectBox,sendData,inputValid}
+        var active = computed(() => {
+            if(data.value && store.state.run.run && /(cnc|cno)/.test(props.box.symbol)){
+                var state = false
+                if(data.value[0] == "T")
+                    state = store.state.run.stateTable[data.value[0]][data.value.substring(1)]
+                else
+                    state = store.state.run.stateTable[data.value[0]][data.value.substring(1).split('.')[0]][data.value.substring(1).split('.')[1]]
+
+                if(props.box.symbol == "cnc")
+                    state = !state
+
+                return state
+            }
+            return false
+        })
+
+        var activeAfter = false
+        var activeBefore = false
+
+        return {boxInput,selectBox,sendData,inputValid, active, activeAfter, activeBefore}
     }
 }
 </script>
@@ -161,7 +185,58 @@ export default {
         outline: 1px solid black;
         outline-offset: -1px;
     }
-    
+    .boxActive{
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: rgba(0, 0, 255, 0.445);
+        top: 20px;
+        left: 40px;
+    }
+    .boxActiveBefore, .boxActiveAfter{
+        position: absolute;
+        background: rgb(58, 224, 141);
+        top: 28px;
+        left: 0;
+        height: 4px;
+    }
+    .symbol-contact .boxActiveBefore{
+        width: 34px;
+    }
+    .symbol-coil .boxActiveBefore{
+        width: 28px;
+    }
+    .symbol-coil .boxActiveBefore::after{
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: rgba(0, 0, 255, 0.445);
+        top: -9px;
+        left: 40px;
+    }
+    .boxActiveAfter{
+        left: 66px;
+    }
+    .boxActiveTop{
+        position: absolute;
+        background: rgb(58, 224, 141);
+        top: 0;
+        right: 0;
+        height: 32px;
+        width: 4px;
+    }
+    .boxActiveBottom{
+        position: absolute;
+        background: rgb(58, 224, 141);
+        bottom: 0;
+        right: 0;
+        height: 32px;
+        width: 4px;
+    }
+    .symbol-contact .boxActiveAfter{
+        width: 34px;
+    }
     .symbol-block-top .box-background{
         --position-y-two: 22px;
     }

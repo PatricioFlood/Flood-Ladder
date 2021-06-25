@@ -13,8 +13,8 @@
 <script>
 import PanelLeft from "./components/PanelLeft.vue"
 import PanelTop from "./components/PanelTop.vue"
-import Ladder from "./components/Ladder.vue"
-import SymbolTable from "./components/SymbolTable.vue"
+import Ladder from "@/views/project/Ladder.vue"
+import SymbolTable from "@/views/project/SymbolTable.vue"
 import PanelRun from "./components/PanelRun.vue"
 import {useStore} from "vuex"
 import {computed, onMounted} from '@vue/runtime-core'

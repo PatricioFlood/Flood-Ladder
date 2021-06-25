@@ -115,14 +115,54 @@ export default {
 
                 if(props.box.symbol == "cnc")
                     state = !state
-
                 return state
+                
             }
             return false
         })
 
-        var activeAfter = false
-        var activeBefore = false
+        var activeBefore = computed(() => {
+            var state = false
+            if(data.value && store.state.run.run){
+                if(props.b == 0)
+                    state = true
+                else 
+                    state = store.getters.box({property: "activeAfter", n: props.n, r: props.r, b: props.b-1})
+            }
+            return state
+        })
+        var activeAfter = computed(() => {
+            var state = false
+            if(store.state.run.run){
+                if(activeBefore.value)
+                    state = active.value
+                if(!state && props.box.connectionTop)
+                    state = store.getters.box({property: "activeAfter", n: props.n, r: props.r-1, b: props.b})
+                if(!state && props.box.connectionBottom)
+                     state = store.getters.box({property: "activeAfter", n: props.n, r: props.r+1, b: props.b}) 
+            }
+            store.commit("setBox", {property: "activeAfter", value: state, n: props.n, r: props.r, b: props.b})
+            state = store.getters.box({property: "activeAfter", n: props.n, r: props.r, b: props.b})
+            return state
+        })
+
+        watch([active, activeBefore], () => {
+            if(!(active.value && activeBefore.value)){
+                store.commit("setBox", {property: "activeAfter", value: false, n: props.n, r: props.r, b: props.b})
+                var r = props.r;
+                while(store.getters.box({property: "connectionTop", n: props.n, r, b: props.b})){
+                    store.commit("setBox", {property: "activeAfter", value: false, n: props.n, r: r-1, b: props.b})
+                    r--
+                }
+                r = props.r;
+                while(store.getters.box({property: "connectionBottom", n: props.n, r, b: props.b})){
+                    store.commit("setBox", {property: "activeAfter", value: false, n: props.n, r: r+1, b: props.b})
+                    r++
+                }
+            }
+        })
+
+
 
         return {boxInput,selectBox,sendData,inputValid, active, activeAfter, activeBefore}
     }
@@ -189,13 +229,13 @@ export default {
         position: absolute;
         width: 20px;
         height: 20px;
-        background: rgba(0, 0, 255, 0.445);
+        background: rgba(58, 171, 224, 0.445);
         top: 20px;
         left: 40px;
     }
     .boxActiveBefore, .boxActiveAfter{
         position: absolute;
-        background: rgb(58, 224, 141);
+        background: rgb(58, 171, 224);
         top: 28px;
         left: 0;
         height: 4px;
@@ -206,12 +246,15 @@ export default {
     .symbol-coil .boxActiveBefore{
         width: 28px;
     }
+    .symbol-block-top .boxActiveBefore{
+        width: 4px;
+    }
     .symbol-coil .boxActiveBefore::after{
         content: "";
         position: absolute;
         width: 20px;
         height: 20px;
-        background: rgba(0, 0, 255, 0.445);
+        background: rgba(58, 171, 224, 0.445);
         top: -9px;
         left: 40px;
     }
@@ -220,7 +263,7 @@ export default {
     }
     .boxActiveTop{
         position: absolute;
-        background: rgb(58, 224, 141);
+        background: rgb(58, 171, 224);
         top: 0;
         right: 0;
         height: 32px;
@@ -228,7 +271,7 @@ export default {
     }
     .boxActiveBottom{
         position: absolute;
-        background: rgb(58, 224, 141);
+        background: rgb(58, 171, 224);
         bottom: 0;
         right: 0;
         height: 32px;

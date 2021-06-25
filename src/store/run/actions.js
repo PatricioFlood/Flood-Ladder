@@ -12,6 +12,22 @@ export default{
         commit("resetStateTable")
     },
 
+    imageToStateTable({rootState, state, commit}, image){
+        for(let row of rootState.symbolTable){
+            const direction = row.direction
+            if(direction && direction[0] != "I"){
+                var type = direction[0]
+                var bytebit = direction.substring(1).split(".")
+                if(bytebit.length == 2 && state.stateTable[type][bytebit[0]][bytebit[1]] != image[type][bytebit[0]][bytebit[1]])
+                    commit("setType", {type, byte: bytebit[0], bit: bytebit[1], value: image[type][bytebit[0]][bytebit[1]]})
+                else if (type == "T" && (state.stateTable[type][bytebit[0] - 37].count != image[type][bytebit[0] - 37].count || 
+                state.stateTable[type][bytebit[0] - 37].init != image[type][bytebit[0] - 37].init)) {
+                    commit("setType", {type, byte: bytebit[0] -37, value: image[type][bytebit[0] - 37]})
+                }
+            }
+        }
+    },
+
     S7Compiler({rootState}){
 
         const line = []
@@ -248,16 +264,13 @@ export default{
 
         logic.push("if(" + stack[0] + getAllElse())
 
-        console.log(logic)
-
-
         while(state.run){
             const tableImage = JSON.parse(JSON.stringify(state.stateTable))
 
             for(let sentence of logic)
                 eval(sentence)
 
-            commit("imageToStateTable", tableImage)
+            dispatch("imageToStateTable", tableImage)
             await delay(50)
         }
 

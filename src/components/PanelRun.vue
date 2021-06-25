@@ -73,7 +73,7 @@ export default {
         const run = computed(() => store.state.run.run)
 
         const pushButtons = computed(() => store.state.symbolTable.filter(row => row.direction && row.direction[0] == "I"))
-        const ligths = computed(() =>store.state.symbolTable.filter(row => row.direction && row.direction[0] == "Q"))
+        const ligths = computed(() => store.state.symbolTable.filter(row => row.direction && row.direction[0] == "Q"))
         const Q = computed(() => store.state.run.stateTable.Q)
         const timers = computed(() => store.state.symbolTable.filter(row => row.direction && row.direction[0] == "T"))
         const T = computed(() => store.state.run.stateTable.T)

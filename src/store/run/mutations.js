@@ -40,14 +40,12 @@ export default{
     },
 
     setType(state, {type, byte, bit, value}){
-        state.stateTable[type][byte][bit] = value
+        if(bit == undefined)
+            state.stateTable[type][byte] = value
+        else
+            state.stateTable[type][byte][bit] = value
     },
 
-    imageToStateTable(state, image){
-        const inputs = JSON.parse(JSON.stringify(state.stateTable.I))
-        state.stateTable = image
-        state.stateTable.I = inputs
-    },
     setRun(state, value){
         state.run = value
     },

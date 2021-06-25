@@ -248,9 +248,6 @@ export default{
 
         logic.push("if(" + stack[0] + getAllElse())
 
-        console.log(logic)
-
-
         while(state.run){
             const tableImage = JSON.parse(JSON.stringify(state.stateTable))
 

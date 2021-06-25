@@ -3,9 +3,14 @@
         <panel-left />
         <div class="principal">
             <panel-top />
-            <keep-alive>
+            <router-view v-slot="{ Component }">
+                <keep-alive>
+                    <component :is="Component" />
+                </keep-alive>
+            </router-view>
+            <!-- <keep-alive>
                 <component :is="view" class="view"/>
-            </keep-alive>
+            </keep-alive> -->
             <panel-run v-show="panelRun"/>
         </div>
     </div>
@@ -16,11 +21,13 @@ import PanelTop from "./components/PanelTop.vue"
 import Ladder from "./components/Ladder.vue"
 import SymbolTable from "./components/SymbolTable.vue"
 import PanelRun from "./components/PanelRun.vue"
+import Home from "./components/Home.vue"
+import Login from "./components/Login.vue"
 import {useStore} from "vuex"
 import {computed, onMounted} from '@vue/runtime-core'
 export default {
     name: "App",
-    components: {PanelLeft, PanelTop, Ladder, SymbolTable, PanelRun},
+    components: {PanelLeft, PanelTop, Ladder, SymbolTable, PanelRun, Login, Home},
     setup(){
         const store = useStore()
         const view = computed(() => store.state.currentView)

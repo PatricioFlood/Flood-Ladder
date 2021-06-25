@@ -109,7 +109,7 @@ export default {
             if(data.value && store.state.run.run && /(cnc|cno)/.test(props.box.symbol)){
                 var state = false
                 if(data.value[0] == "T")
-                    state = store.state.run.stateTable[data.value[0]][data.value.substring(1)]
+                    state = store.state.run.stateTable[data.value[0]][data.value.substring(1) - 37].state
                 else
                     state = store.state.run.stateTable[data.value[0]][data.value.substring(1).split('.')[0]][data.value.substring(1).split('.')[1]]
 

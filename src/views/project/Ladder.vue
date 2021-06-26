@@ -1,7 +1,7 @@
 <template>
     <div class="ladder">
         <div class="networks" id="networks">
-            <network v-for="(i,n) in network.length" :key="n" :n="n" :row="network[n].row" :auxRow="network[n].auxRow" />
+            <network v-for="(i,n) in network.length" :key="n" :n="n"/>
             <button @click="addNetwork" class="add"><span class="material-icons">add</span></button>
         </div>
     </div>
@@ -28,6 +28,8 @@ export default {
 <style scoped>
     .ladder{
         background-color: rgb(24, 121, 121);
+        display: flex;
+        width: 100%;
     }
     .networks {
         width: 270px;

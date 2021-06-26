@@ -1,8 +1,8 @@
 <template>
     <div class="network" :class="{'selected': network.selected}">
         <p @click="selectNetwork(n)">Network {{n+1}}</p>
-        <div class="row" v-for="(i,r) in  row.length" :key="r">
-            <box v-for="(i,b) in row[r].box.length" :key="b" :n="n" :r="r" :b="b" :box="row[r].box[b]"/>
+        <div class="row" v-for="(i,r) of row" :key="r">
+            <box v-for="(i,b) of row[r].box" :key="b" :n="n" :r="r" :b="b" :box="row[r].box[b]"/>
         </div>
         <div class="aux-row">
             <div class="aux-box" v-for="(i,ab) in auxRow.length" :key="ab"
@@ -16,7 +16,7 @@ import Box from "@/components/ladder/Box.vue"
 import {useStore} from "vuex"
 import { computed } from '@vue/runtime-core'
 export default{
-    props: {n: Number, row: Array, auxRow: Array},
+    props: {n: Number},
     components: {Box},
     setup(props){
         const store = useStore()
@@ -26,9 +26,11 @@ export default{
         const selectNetwork = (n) => {
             store.dispatch("select", {n, type:"network"})
         }
+        const auxRow = computed(() => store.state.auxRow[props.n])
         const network = computed(() => store.state.network[props.n])
+        const row = computed(() => store.state.network[props.n].row)
 
-        return{selectAux, selectNetwork, network}
+        return{selectAux, selectNetwork, network, auxRow, row}
     }
 }
 </script>

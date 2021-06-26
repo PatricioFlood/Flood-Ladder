@@ -11,7 +11,6 @@ export default{
     addEmptyNetwork(state){
         state.network.push({
             row: [],
-            auxRow: []
         })
     },
     deleteNetwork(state){
@@ -22,8 +21,7 @@ export default{
         state.selected = {n: newN, type:"network"}
         state.network[newN].selected = true
         state.network.splice(n,1)
-        localStorage.setItem("network",JSON.stringify(state.network))
-        localStorage.setItem("selected",JSON.stringify(state.selected))
+        state.auxRow.splice(n,1)
     },
 
     addEmptyRow(state, n){
@@ -46,10 +44,11 @@ export default{
         state.network[n].row.pop()
         return 
     },
-    addAuxRow(state, n){
+    addAuxRow(state){
+        const l = state.auxRow.push([]) - 1
         for(var i = 0; i<10; i++){
-            state.network[n].auxRow.push({})
-    }
+            state.auxRow[l].push({})
+        }
     },
     addEmptyBox(state, {n, r}){
         state.network[n].row[r].box.push({})
@@ -78,9 +77,13 @@ export default{
 
     setAuxBox(state, {property, value, n, ab}){
         if(value !== 0 && !value)
-            delete state.network[n].auxRow[ab][property]
+            delete state.auxRow[n][ab][property]
         else
-            state.network[n].auxRow[ab][property] = value
+            state.auxRow[n][ab][property] = value
+    },
+
+    resetAuxBox(state){
+        state.auxBox = []
     },
 
     setNetworkProperty(state, {property, value, n}){
@@ -106,17 +109,14 @@ export default{
     },
     setSymbolTable(state, {property, value, row}){
         state.symbolTable[row][property] = value
-        localStorage.setItem("symbolTable",JSON.stringify(state.symbolTable))
     },
 
     resetSymbolTable(state){
         state.symbolTable = []
-        localStorage.setItem("symbolTable",JSON.stringify(state.symbolTable))
     },
 
     deleteRowSymbolTable(state, row){
         state.symbolTable.splice(row,1)
-        localStorage.setItem("symbolTable",JSON.stringify(state.symbolTable))
     },
 
     setSymbolTableFromLocal(state,value){
@@ -162,5 +162,9 @@ export default{
 
     setNetwork(state,value){
         state.network = value
+    },
+
+    setProjectName(state, value){
+        state.name = value
     }
 }

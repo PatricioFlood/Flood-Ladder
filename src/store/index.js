@@ -8,8 +8,10 @@ export default createStore({
   state: {
     selected: {n: 0, r: 0, b: 0, type: 'box'},
     network: [],
+    auxRow: [],
     currentView: "ladder",
     symbolTable: [],
+    name: "proyecto"
   },
   mutations,
   getters,

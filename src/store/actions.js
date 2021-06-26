@@ -1,17 +1,16 @@
 export default{
 
-    initialize({dispatch, commit, state}, force = false){
-        const local = localStorage.getItem("network")
+    initialize({dispatch, commit, state, getters}, force = false){
+        commit("setNetwork", [])
+        commit("setSymbolTableFromLocal",[])
+        commit("resetAuxBox")
+        const local = getters.localProjects.find(obj => obj.name == state.name)
         if(local && !force){
-            commit("setNetwork", JSON.parse(local))
-            const selected = JSON.parse(localStorage.getItem("selected"))
-            if(selected.type == 'aux')
-                commit("setAuxBox", {property: "selected", value: false, n: selected.n, ab: selected.b})
-            else if(selected.type == 'box')
-                commit("setBox", {property: "selected", value: false, n: selected.n, r: selected.r, b: selected.b})
-            else {
-                commit("setNetworkProperty", {property: "selected", value: false, n: selected.n})
+            commit("setNetwork", local.ladder)
+            for(i = 0; i<local.ladder.length; i++){
+                commit("addAuxRow")
             }
+            commit("setSymbolTableFromLocal", local.symbolTable.map(obj => ({symbol: obj[0], direction: obj[1], comment: obj[2]})))
         } 
         else {
             for(var i = 0; i<5; i++){
@@ -20,20 +19,13 @@ export default{
         }
         commit("setBox", {property: "selected", value: true, n: 0, r: 0, b: 0})
         if(force){
-            localStorage.removeItem("network",JSON.stringify(state.network))
-            localStorage.removeItem("selected",JSON.stringify(state.selected))
+            dispatch("removeProject")
         }
     },
 
     resetNetworks({commit, dispatch}){
         commit("replaceNetwork", [])
         dispatch("initialize", true)
-    },
-
-    initializeSymbolTable({commit}){
-        const local = localStorage.getItem("symbolTable")
-        if(local)
-            commit("setSymbolTableFromLocal", JSON.parse(local))
     },
 
     deleteRowByDirection({state, commit}, direction){
@@ -56,7 +48,7 @@ export default{
         var actualNetwork = state.network.length-1
 
         dispatch("addRow", {n: actualNetwork})
-        commit("addAuxRow", actualNetwork)
+        commit("addAuxRow")
     },
 
     addRow({commit,state,dispatch,getters}, {n, r}){
@@ -136,6 +128,7 @@ export default{
         dispatch("select", {n, r: r+1, b: b+1, type: "box"})
         localStorage.setItem("network",JSON.stringify(state.network))
         localStorage.setItem("selected",JSON.stringify(state.selected))
+        dispatch("saveInLocal") 
     },
 
     putTop({getters, dispatch, state}, {n,r,b}){
@@ -153,6 +146,7 @@ export default{
         dispatch("select", {n, r: r-1, b: b+1, type: "box"}) 
         localStorage.setItem("network",JSON.stringify(state.network))
         localStorage.setItem("selected",JSON.stringify(state.selected))
+        dispatch("saveInLocal") 
     },
 
     putTon({state, getters, commit, dispatch},{n,r,b}){
@@ -172,6 +166,7 @@ export default{
         commit("setRow", {property: "last", value: b-1, n, r: r+1})
         localStorage.setItem("network",JSON.stringify(state.network))
         localStorage.setItem("selected",JSON.stringify(state.selected))
+        dispatch("saveInLocal") 
     },
 
     putCtu({state, getters, commit, dispatch},{n,r,b}){
@@ -203,6 +198,7 @@ export default{
         commit("setRow", {property: "last", value: b-1, n, r: r+2})    
         localStorage.setItem("network",JSON.stringify(state.network))
         localStorage.setItem("selected",JSON.stringify(state.selected))
+        dispatch("saveInLocal") 
     },
 
     // setLast({getters, commit}, {n, r, b, force=false}){
@@ -385,6 +381,7 @@ export default{
 
         localStorage.setItem("network",JSON.stringify(state.network))
         localStorage.setItem("selected",JSON.stringify(state.selected))
+        dispatch("saveInLocal") 
     },
 
     deleteSymbol({state, commit, dispatch, getters}, {n, r, b} = {n: state.selected.n, r: state.selected.r, b: state.selected.b}){
@@ -454,7 +451,34 @@ export default{
             
         localStorage.setItem("network",JSON.stringify(state.network))
         localStorage.setItem("selected",JSON.stringify(state.selected))
+        dispatch("saveInLocal") 
     },
+
+    saveInLocal({state}){
+        const copyNetwork = JSON.parse(JSON.stringify(state.network))
+        if(state.selected.type == "box")
+            delete copyNetwork[state.selected.n].row[state.selected.r].box[state.selected.b]["selected"]
+        else if(state.selected.type == "network")
+            delete copyNetwork[state.selected.n]["selected"]
+        const localP = localStorage.getItem("localProjects")
+        const localProjects = localP?JSON.parse(localP):[]
+        var project = localProjects.find(proj => proj.name == state.name)
+        if(project == undefined){
+            localProjects.push({name: state.name})
+            project = localProjects.find(proj => proj.name == state.name)
+        }
+        project.ladder = copyNetwork
+        project.symbolTable = state.symbolTable.map(obj => Object.values(obj))
+        project.date = new Date(Date.now()-10800000).toISOString()
+        localStorage.setItem("localProjects", JSON.stringify(localProjects))
+    },
+    removeProject({state,getters}){
+        const local = getters.localProjects.find(proj => proj.name == state.name)
+        if(local){
+            local.splice(local.findIndex(proj => proj.name == state.name), 1)
+            localStorage.setItem("localProjects", JSON.stringify(local))
+        }   
+    }
 }
 
 const isFinal = (symbol) => {
@@ -468,3 +492,5 @@ const isReplaceable = (symbol) => {
 const isContinue = (symbol) => {
     return /continue|start/.test(symbol)
 }
+
+

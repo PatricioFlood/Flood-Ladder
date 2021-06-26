@@ -41,5 +41,9 @@ export default{
                 return row.symbol||direction
         }
         return ""
+    },
+    localProjects: () => {
+        const localP = localStorage.getItem("localProjects")
+        return localP?JSON.parse(localP):[]
     }
  }

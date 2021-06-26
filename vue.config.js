@@ -21,7 +21,7 @@ module.exports = {
       },
       workboxOptions: {
         skipWaiting: true,
-        exclude: [/CNAME/, /css\.map$/]
+        exclude: [/CNAME/, /\.map$/]
       }
     }
   }

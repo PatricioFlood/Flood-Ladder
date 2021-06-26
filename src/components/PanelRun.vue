@@ -68,8 +68,9 @@ export default {
 
         const store = useStore()
 
+        if(!store.state.run.stateTable.I[0])
+            store.dispatch("initializeStateTable")
         
-
         const run = computed(() => store.state.run.run)
 
         const pushButtons = computed(() => store.state.symbolTable.filter(row => row.direction && row.direction[0] == "I"))

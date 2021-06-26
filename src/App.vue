@@ -8,14 +8,11 @@
 </template>
 <script>
 import PanelLeft from "./components/PanelLeft.vue"
-import {onMounted} from '@vue/runtime-core'
-import { useStore } from 'vuex'
 export default {
     name: "App",
     components: {PanelLeft},
     setup(){
         //VH para CSS
-        const store = useStore()
         const setVH = () => {
             const vh = window.innerHeight;
             document.getElementById("app").style.setProperty('--vh', `${vh}px`);
@@ -23,12 +20,6 @@ export default {
         setVH()
         window.addEventListener("resize", setVH)
 
-        store.dispatch("initialize")
-        store.dispatch("initializeStateTable")
-
-        onMounted(() => {
-            store.dispatch("initializeSymbolTable")
-        })
     }
 }
 </script>

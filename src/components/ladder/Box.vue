@@ -71,6 +71,7 @@ export default {
             store.commit("setBox", {property: "name", value: boxInput.value, n: props.n, r: props.r, b: props.b})
             localStorage.setItem("network",JSON.stringify(store.state.network))
             localStorage.setItem("selected",JSON.stringify(store.state.selected))
+            store.dispatch("saveInLocal") 
         }
 
         const actualizeData = () => {

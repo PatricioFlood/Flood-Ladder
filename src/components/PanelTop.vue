@@ -34,6 +34,7 @@
         <div class="menu">
             <button @click="openMenu('principal')" class="menu-button"><span class="material-icons">{{menu.principal?'close':'menu'}}</span></button>
             <ul v-show="menu.principal" class="menu-items">
+                    <li @click="$router.push({name: 'home'})"><span class="material-icons" style="color: #2DACA1">home</span>Inicio</li>
                     <li @click="changeView('symbol-table')" v-show="view != 'symbol-table'"><span class="material-icons" style="color: #2DACA1">backup_table</span>Tabla de Símbolos</li>
                     <li @click="changeView('ladder')" v-show="view != 'ladder'"><span class="material-icons" style="color: #2DACA1">description</span>Bloque de Programa</li>
                     <li @click="openPanelRun()" v-show="!run"><span class="material-icons" style="color: #6BB464">play_arrow</span>Simulación</li>

@@ -36,7 +36,7 @@
                     </div>
                 </div>
             </div>
-            <div class="table">
+            <div class="table" v-if="variables.length>0 || timers.length>0">
                 <div class="variables" v-if="variables.length>0">
                     <div class="tableTitle">Variables</div>
                     <div>Direccion</div><div>Estado</div>
@@ -89,6 +89,7 @@ export default {
                     store.commit("setI", {byte: button.direction[1], bit: button.direction[3], value})
             }
             store.dispatch("runLadder2")
+            
         }
 
         const stopLadder = () => {

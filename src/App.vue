@@ -1,16 +1,18 @@
 <template>
     <div class="container">
-        <panel-left />
+        <principal-menu class="left-menu" :show="true"/>
         <div class="principal">
+            <panel-top />
             <router-view/>
         </div>
     </div>
 </template>
 <script>
-import PanelLeft from "./components/PanelLeft.vue"
+import PrincipalMenu from "./components/PrincipalMenu.vue"
+import PanelTop from "./components/PanelTop.vue"
 export default {
     name: "App",
-    components: {PanelLeft},
+    components: {PrincipalMenu, PanelTop},
     setup(){
         //VH para CSS
         const setVH = () => {
@@ -37,4 +39,12 @@ export default {
         flex-shrink: 0;
         flex-grow: 1;
     }
+
+
+@media screen and (max-width: 768px) {
+    .left-menu{
+        display: none;
+    }
+}
+
 </style>

@@ -18,6 +18,7 @@ export default{
             }
         }
         commit("setBox", {property: "selected", value: true, n: 0, r: 0, b: 0})
+        commit("setSelected", {n: 0, r: 0, b: 0, type: "box"})
         if(force){
             dispatch("removeProject")
         }
@@ -462,20 +463,27 @@ export default{
             delete copyNetwork[state.selected.n]["selected"]
         const localP = localStorage.getItem("localProjects")
         const localProjects = localP?JSON.parse(localP):[]
-        var project = localProjects.find(proj => proj.name == state.name)
-        if(project == undefined){
-            localProjects.push({name: state.name})
-            project = localProjects.find(proj => proj.name == state.name)
-        }
-        project.ladder = copyNetwork
-        project.symbolTable = state.symbolTable.map(obj => Object.values(obj))
-        project.date = new Date(Date.now()-10800000).toISOString()
+        const index = localProjects.findIndex(proj => proj.name == state.name)
+        if(index >= 0)  localProjects.splice(index,1)
+        localProjects.unshift({
+            name: state.name,
+            ladder: copyNetwork,
+            symbolTable: state.symbolTable.map(obj => Object.values(obj)),
+            date: Date.now()-10800000
+        })
         localStorage.setItem("localProjects", JSON.stringify(localProjects))
     },
     removeProject({state,getters}){
-        const local = getters.localProjects.find(proj => proj.name == state.name)
-        if(local){
+        const local = getters.localProjects
+        if(local.find(proj => proj.name == state.name)){
             local.splice(local.findIndex(proj => proj.name == state.name), 1)
+            localStorage.setItem("localProjects", JSON.stringify(local))
+        }   
+    },
+    renameProject({state,getters}, name){
+        const local = getters.localProjects
+        if(local.find(proj => proj.name == state.name)){
+            local[local.findIndex(proj => proj.name == state.name)].name = name.replace(" ", "-")
             localStorage.setItem("localProjects", JSON.stringify(local))
         }   
     }

@@ -8,7 +8,9 @@ const routes = [
   {
     path: "/",
     name: "home",
-    component: Home
+    components: {
+      default: Home,
+    }
   },
   {
     path: "/proyectos/:name",
@@ -17,10 +19,10 @@ const routes = [
       {
         name: "ladder",
         path: "",
-        component: Ladder
+        component: Ladder,
       },
       {
-        name: "symbol",
+        name: "symbolTable",
         path: "",
         component: SymbolTable
       },

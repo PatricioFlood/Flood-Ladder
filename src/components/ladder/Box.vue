@@ -86,6 +86,7 @@ export default {
                         store.commit("orderSymbolTable")
                     }
                 }
+                store.dispatch("saveInLocal")
         }
 
         sendData()

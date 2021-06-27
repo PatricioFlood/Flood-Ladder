@@ -18,7 +18,7 @@
 import { computed, ref } from '@vue/runtime-core'
 import {useStore} from "vuex"
 import Row from "@/components/symbolTable/Row.vue"
-import Alert from "@/components/alert/alert.vue"
+import Alert from "@/components/alert/Alert.vue"
 export default {
     components: {Row, Alert},
     setup() {

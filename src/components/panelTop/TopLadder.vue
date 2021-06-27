@@ -1,38 +1,44 @@
 <template>
         <div class="ladder-menu">
-            <button @click="putSymbol('top', 'connect')" :disabled="!canPutTop||!canPut" class="arrow-top"><span class="iconl-arrow-top"></span></button>
-            <button @click="putSymbol('bottom', 'connect')" :disabled="!canPut"><span class="iconl-arrow-bottom"></span></button>
-            <button @click="putSymbol('line', 'connect')" :disabled="!canPut" class="line"><span class="iconl-arrow-rigth"></span></button>
-            <div class="contact">
-                <button @click="openMenu('contact')" :disabled="!canPut"><span class="iconl-contact"></span></button>
-                <ul v-show="menu.contact" class="submenu">
-                    <li @click="putSymbol('cno','contact')">-|  &nbsp;&nbsp;|-</li>
-                    <li @click="putSymbol('cnc','contact')">-| / |-</li>
-                    <li @click="putSymbol('n','contact')">-| N |-</li>
-                    <li @click="putSymbol('p','contact')">-| P |-</li>
-                </ul>
-            </div>
-            <div class="coil">
-            <button @click="openMenu('coil')" :disabled="!canPut||!canPutFinal"><span class="iconl-coil" ></span></button>
-                <ul v-show="menu.coil" class="submenu">
-                    <li @click="putSymbol('coil','coil')">-( &nbsp;&nbsp;)</li>
-                    <li @click="putSymbol('reset','coil')">R</li>
-                    <li @click="putSymbol('set','coil')">S</li>
-                </ul>
-            </div>
-            <div class="blocks">
-                <button @click="openMenu('blocks')" :disabled="!canPut||!canPutFinal"><span class="iconl-blocks"></span></button>
-                <ul v-show="menu.blocks" class="submenu">
-                    <li @click="putSymbol('ton', 'block')">TON</li>
-                    <li @click="putSymbol('ctu', 'block')">CTU</li>
-                </ul>
-            </div>
+            <template v-if="selected.type !='network'">
+                <button @click="putSymbol('top', 'connect')" :disabled="!canPutTop" class="arrow-top"><span class="iconl-arrow-top"></span></button>
+                <button @click="putSymbol('bottom', 'connect')" :disabled="!canPut"><span class="iconl-arrow-bottom"></span></button>
+                <button @click="putSymbol('line', 'connect')" :disabled="!canPut" class="line"><span class="iconl-arrow-rigth"></span></button>
+                <div class="contact">
+                    <button @click="openMenu('contact')" :disabled="!canPut"><span class="iconl-contact"></span></button>
+                    <ul v-show="menu.contact" class="submenu">
+                        <li @click="putSymbol('cno','contact')">-|  &nbsp;&nbsp;|-</li>
+                        <li @click="putSymbol('cnc','contact')">-| / |-</li>
+                        <li @click="putSymbol('n','contact')">-| N |-</li>
+                        <li @click="putSymbol('p','contact')">-| P |-</li>
+                    </ul>
+                </div>
+                <div class="coil">
+                <button @click="openMenu('coil')" :disabled="!canPutFinal"><span class="iconl-coil" ></span></button>
+                    <ul v-show="menu.coil" class="submenu">
+                        <li @click="putSymbol('coil','coil')">-( &nbsp;&nbsp;)</li>
+                        <li @click="putSymbol('reset','coil')">R</li>
+                        <li @click="putSymbol('set','coil')">S</li>
+                    </ul>
+                </div>
+                <div class="blocks">
+                    <button @click="openMenu('blocks')" :disabled="!canPutFinal"><span class="iconl-blocks"></span></button>
+                    <ul v-show="menu.blocks" class="submenu">
+                        <li @click="putSymbol('ton', 'block')">TON</li>
+                        <li @click="putSymbol('ctu', 'block')">CTU</li>
+                    </ul>
+                </div>
+            </template>
+            <template v-if="selected.type =='network'">
+                <button @click="copyNetwork()"><span class="material-icons">content_copy</span></button>
+                <button @click="pasteNetwork()" :disabled="copyIndex == null"><span class="material-icons">content_paste</span></button>
+            </template>
             <button @click="deleteSymbol" :disabled="!canDelete"><span class="material-icons trash">delete</span></button>
         </div>
         <div v-show="backMenu" class="backmenu" @click="closeMenu"></div>
 </template>
 <script>
-import { computed, reactive } from '@vue/runtime-core'
+import { computed, reactive, ref } from '@vue/runtime-core'
 import {useStore} from "vuex"
 export default {
     setup() {
@@ -44,6 +50,20 @@ export default {
             principal: false,
             alert: false,
         })
+        const selected = computed(() => store.state.selected)
+
+        var copyIndex = ref(null);
+
+        const copyNetwork = () => {
+            copyIndex.value = selected.value.n
+        }
+
+        const pasteNetwork = () => {
+            store.commit("addAuxRow")
+            store.commit("insertNetwork", {copyIndex: copyIndex.value, insertIndex: selected.value.n})
+            store.dispatch("saveInLocal")
+            copyIndex.value = null
+        }
 
         const openMenu = (option) => {
             const value = menu[option]
@@ -69,7 +89,7 @@ export default {
             else
                 store.dispatch("deleteSymbol")
         }
-        const selected = computed(() => store.state.selected)
+        
 
         const canPut = computed(() => {
             if(store.getters.box({property: "symbol"}) == "center-input" || selected.value.type == 'network' || store.state.run.run)
@@ -77,10 +97,11 @@ export default {
             return store.getters.selectedFinal !== undefined ? (selected.value.b <= store.getters.selectedFinal) : true
         })
         const canPutFinal = computed(() => {
+            if(!canPut.value) return false
             return selected.value.type != 'network' && selected.value.b > 0 ? (store.getters.selectedLast ? (selected.value.b >= store.getters.selectedLast) : true) : false
         })
         const canPutTop = computed(() => {
-            if(selected.value.type == 'network') return false
+            if(!canPut.value) return false
 
             var r = selected.value.r
             if(selected.value.type == 'aux') 
@@ -111,7 +132,7 @@ export default {
             return (symbol != "center-input" && symbol != "start" && symbol != "continue")
         })
 
-        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, backMenu, openMenu}
+        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, backMenu, openMenu, copyNetwork, pasteNetwork, copyIndex}
     },
 }
 </script>

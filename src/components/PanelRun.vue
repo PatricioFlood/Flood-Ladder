@@ -83,13 +83,17 @@ export default {
         const counters = computed(() => store.state.symbolTable.filter(row => row.direction && row.direction[0] == "C"))
         const C = computed(() => store.state.run.stateTable.C)
 
-        const runLadder = () => {
+        const runLadder = async () => {
             for(let button of pushButtons.value){
                 const value = /[nN][cC]/.test(button.comment)
                     store.commit("setI", {byte: button.direction[1], bit: button.direction[3], value})
             }
-            store.dispatch("runLadder2")
-            
+            const res = await store.dispatch("precompile")
+            if(res){
+                alert(res.message + " - Network: " + (res.n+1) + ", Columna: " + (res.r+1) + ", Fila: " + (res.b+1))
+            } else {
+                store.dispatch("runLadder2")
+            }
         }
 
         const stopLadder = () => {

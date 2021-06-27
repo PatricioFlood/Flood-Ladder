@@ -2,12 +2,12 @@
     <div class="network" :class="{'selected': network.selected}">
         <p @click="selectNetwork(n)">Network {{n+1}}</p>
         <div class="row" v-for="(i,r) of row" :key="r">
-            <box v-for="(i,b) of row[r].box" :key="b" :n="n" :r="r" :b="b" :box="row[r].box[b]"/>
+            <box v-for="(i,b) of row[r].box" :key="b" :n="n" :r="r" :b="b"/>
         </div>
         <div class="aux-row">
             <div class="aux-box" v-for="(i,ab) in auxRow.length" :key="ab"
             @click="selectAux(n,ab)" 
-            :class="{'selected' : auxRow[ab].selected}"></div>
+            :class="{'selected' : auxRow[ab].selected}" tabindex="0"></div>
         </div>
     </div>
 </template>

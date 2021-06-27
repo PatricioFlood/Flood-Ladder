@@ -28,6 +28,106 @@ export default{
         }
     },
 
+    precompile({rootState, dispatch}){
+
+        const precompiler1 = (n, r, boxEnd) => {
+            for(let b = 0; b<=boxEnd; b++){
+                const box = rootState.network[n].row[r].box[b]
+                if(box.input && (!box.data || box.data == "???"))
+                    return {n,r,b, message: "Nombre o Dirección Incorrectos"}
+                if(box.symbol == "continue")
+                    return {n,r,b, message: "Fila Incompleta"}
+
+                if(box.symbol == "line" && b == 0 && (box.connectionBottom || box.connectionTop))
+                    return {n,r,b, message: "Error de linea vacia"}
+                
+
+                if(b == boxEnd && (b.symbol == "cnc" || box.symbol == "cno") && !box.connectionTop 
+                    && !box.connectionBottom )
+                        return {n,r,b, message: "Fila Incompleta"}
+                    
+                //Invertir simbolos continue
+                if(box.symbol == "line" && !box.connectionTop 
+                && !box.connectionBottom && b!=boxEnd && rootState.network[n].row[r].final != b+1 
+                && rootState.network[n].row[r].box[b+1].symbol != "line"){
+                    
+                    rootState.network[n].row[r].box[b].symbol = rootState.network[n].row[r].box[b+1].symbol
+                    rootState.network[n].row[r].box[b].data = rootState.network[n].row[r].box[b+1].data
+                    rootState.network[n].row[r].box[b].name = rootState.network[n].row[r].box[b+1].name
+                    rootState.network[n].row[r].box[b].input = rootState.network[n].row[r].box[b+1].input
+                    rootState.network[n].row[r].box[b].cssClass = rootState.network[n].row[r].box[b+1].cssClass
+
+                    rootState.network[n].row[r].box[b+1].symbol = "line"
+                    delete rootState.network[n].row[r].box[b+1]["data"]
+                    delete rootState.network[n].row[r].box[b+1]["name"]
+                    delete rootState.network[n].row[r].box[b+1]["input"]
+                    rootState.network[n].row[r].box[b+1].cssClass = "symbol-line"
+                    b--
+                }
+            }
+        }
+
+        const precompiler2 = (n, boxEnd) => {
+            for(let b = 0; b<=boxEnd; b++){
+                if(rootState.network[n].row[0].box[b].symbol == "line"){
+                    var compress = true;
+                    for(let row = 1; rootState.network[n].row[row]; row++){
+                        if(rootState.network[n].row[row].box[b].symbol != "line"){
+                            compress = false;
+                            break
+                        }
+                    }
+                    if(compress){
+                        for(let row = 0; rootState.network[n].row[row]; row++){
+                            if(b>0){
+                                rootState.network[n].row[row].box[b-1].connectionBottom = rootState.network[n].row[row].box[b].connectionBottom
+                                rootState.network[n].row[row].box[b-1].connectionTop = rootState.network[n].row[row].box[b].connectionTop
+                            }
+                            for(let bAux = b+1; bAux<=boxEnd; bAux++){
+                                rootState.network[n].row[row].box[bAux-1] = {...rootState.network[n].row[row].box[bAux]}
+                            }
+                            rootState.network[n].row[row].box[boxEnd] = {}
+                            if(rootState.network[n].row[row].final)
+                                rootState.network[n].row[row].final--
+                            rootState.network[n].row[row].last--
+                        }
+                        boxEnd--
+                    }
+                }
+            }
+        }
+
+        for(let n = 0; n < rootState.network.length; n++){
+            for(let r = 0; r < rootState.network[n].row.length; r++){
+                if(rootState.network[n].row[r].box[0].symbol != "start"){
+
+                    if(rootState.network[n].row[r].last == undefined)
+                        return {n,r:r,b:0, message: "Error"}
+
+                    let error = precompiler1(n,r,rootState.network[n].row[r].last)
+
+                    if(error) return error
+
+                } else {
+                    break
+                }
+            }
+        }
+        for(let n = 0; n < rootState.network.length; n++){
+            if(rootState.network[n].row[0].box[0].symbol != "start"){
+
+                let error = precompiler2(n,rootState.network[n].row[0].last)
+
+                if(error) return error
+
+            } else {
+                break
+            }
+        }
+        dispatch("saveInLocal")
+
+    },
+
     S7Compiler({rootState}){
 
         const line = []
@@ -60,6 +160,12 @@ export default{
             for(let b = boxInit; b<=boxEnd; b++){
                 const symbol = rootState.network[n].row[row].box[b].symbol
                 const data = rootState.network[n].row[row].box[b].data
+
+                if(symbol == "continue"){
+                    error.push({n,r: row,b: b, message: "Fila sin terminar"})
+                    return
+                }
+                    
                 if(b != boxInit && b != boxEnd && rootState.network[n].row[row].box[b-1].connectionBottom && rootState.network[n].row[row+1].box[b].symbol){
                     let hasTop = false
                     let newBoxEnd = b
@@ -85,7 +191,6 @@ export default{
                     continue    
                 }
                 if(symbol == "cnc" || symbol == "cno"){
-
                     line.push(((b==boxInit && init)?"LD":"A") + (symbol=="cnc"?"N ":" ") + data)
 
                 } else {
@@ -94,7 +199,7 @@ export default{
                     } else if(symbol == "ton-top"){
                     line.push("TON " + data + ", " + rootState.network[n].row[row+1].box[b-1].data)
                     }
-                    if(rootState.network[n].row[row].box[b-1].connectionBottom){
+                    if(b> 0 && rootState.network[n].row[row].box[b-1].connectionBottom){
                         row = row+1
                         b = b-1
                         boxEnd = rootState.network[n].row[row].last
@@ -116,7 +221,6 @@ export default{
                 break
             }
         }
-
         return {line, error}
 
     },

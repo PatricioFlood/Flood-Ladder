@@ -3,7 +3,11 @@
         <principal-menu class="left-menu" :show="true"/>
         <div class="principal">
             <panel-top />
-            <router-view/>
+            <router-view v-slot="{ Component }">
+                <keep-alive max="1" include="project">
+                <component :is="Component" :key="$route.fullPath"/>
+                </keep-alive>
+            </router-view>
         </div>
     </div>
 </template>

@@ -14,14 +14,16 @@ export default{
         })
     },
     deleteNetwork(state){
-        if(state.network.length < 2)
+        const l = state.network.length
+        if(l < 2)
             return
         const n = state.selected.n
-        const newN = n>0?n-1:0
-        state.selected = {n: newN, type:"network"}
-        state.network[newN].selected = true
         state.network.splice(n,1)
         state.auxRow.splice(n,1)
+
+        const newN = n==l-1?n-1:n
+        state.selected = {n: newN, type:"network"}
+        state.network[newN]["selected"] = true
     },
 
     addEmptyRow(state, n){
@@ -162,6 +164,12 @@ export default{
 
     setNetwork(state,value){
         state.network = value
+    },
+
+    insertNetwork(state, {copyIndex, insertIndex}){
+        const copyNetwork = JSON.parse(JSON.stringify(state.network[copyIndex]))
+        delete copyNetwork["selected"]
+        state.network.splice(insertIndex+1, 0, copyNetwork)
     },
 
     setProjectName(state, value){

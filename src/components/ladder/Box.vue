@@ -9,6 +9,7 @@
         <div class="boxActiveBefore" v-if="activeBefore"></div>
         <div class="boxActiveBottom" v-if="activeAfter && box.connectionBottom"></div>
         <div class="boxActiveTop" v-if="activeAfter && box.connectionTop"></div>
+        <div class="boxTimer" v-if="timerT">{{timerT}}</div>
     </div>
 </template>
 <script>
@@ -17,60 +18,59 @@ import {useStore} from "vuex"
 import { computed, watch } from '@vue/runtime-core'
 
 export default {
-    props: {n: Number, r: Number, b: Number, box: Object},
+    props: {n: Number, r: Number, b: Number},
     setup(props){
         const store = useStore()
-        var boxInput = ref(store.getters.box({property: "name", n: props.n, r: props.r, b: props.b}))
+        var box = computed(() => store.state.network[props.n]?
+        (store.state.network[props.n].row[props.r]?store.state.network[props.n].row[props.r].box[props.b]:{}):{})
+        var boxInput = ref(box.value.name||"???")
         var inputValid = ref("error")
-        var data = ref(store.getters.box({property: "data", n: props.n, r: props.r, b: props.b}))
+        var data = ref(box.value.data)
         const sendData = () => {
-
             if(!boxInput.value){
                 boxInput.value = "???"
                 inputValid.value = "error"
-                return
-            }
-
-            if(props.box.symbol == "center-input"){
-                if(/^[1-9][0-9]{0,}$/.test(boxInput.value))
-                    data.value = boxInput.value
-                else {
-                    inputValid.value = "error"
-                    return
-                }
             } else {
-                var regex = /^(([QqIiVv][0-7]\.[0-7])|([tT]((3[7-9])|([4-5][0-9])|(6[0-3])))|([cC](([1-5][0-9])|(6[0-3])|([1-9]))))$/
-                
-                if(regex.test(boxInput.value)){
-                    data.value = boxInput.value[0].toUpperCase() + boxInput.value.slice(1);
-                    let symbol = store.getters.searchSymbolTableByDirection(data.value)
-                    if(symbol){
-                        boxInput.value = symbol
-                    } else if (/^[QITVC]/.test(boxInput.value)){
-                        store.commit("addRowToSymbolTable")
-                        store.commit("setSymbolTable", {property: "direction", value: data.value, row: store.state.symbolTable.length-1})
-                        store.commit("orderSymbolTable")
-                    } else {
-                        boxInput.value = data.value
+                if(box.value.symbol == "center-input"){
+                    if(/^[1-9][0-9]{0,}$/.test(boxInput.value)){
+                        data.value = boxInput.value
+                        inputValid.value = "correct"
+                    }
+                    else {
+                        inputValid.value = "error"
                     }
                 } else {
-                    data.value = store.getters.searchSymbolTable(boxInput.value)
-                    if(!data.value){
-                        if(props.box.symbol == "ton-top")
-                            store.commit("setBox", {property: "blockData2", value: "??? ms", n: props.n, r: props.r+1, b: props.b})
-                        inputValid.value = "error"
-                        return
+                    var regex = /^(([QqIiVv][0-7]\.[0-7])|([tT]((3[7-9])|([4-5][0-9])|(6[0-3])))|([cC](([1-5][0-9])|(6[0-3])|([1-9]))))$/
+                    
+                    if(regex.test(boxInput.value)){
+                        data.value = boxInput.value[0].toUpperCase() + boxInput.value.slice(1);
+                        let symbol = store.getters.searchSymbolTableByDirection(data.value)
+                        if(symbol){
+                            boxInput.value = symbol
+                        } else if (/^[QITVC]/.test(boxInput.value)){
+                            store.commit("addRowToSymbolTable")
+                            store.commit("setSymbolTable", {property: "direction", value: data.value, row: store.state.symbolTable.length-1})
+                            store.commit("orderSymbolTable")
+                        } else {
+                            boxInput.value = data.value
+                        }
+                        inputValid.value = "correct"
+                    } else {
+                        data.value = store.getters.searchSymbolTable(boxInput.value)
+                        if(!data.value){
+                            if(box.value.symbol == "ton-top")
+                                store.commit("setBox", {property: "blockData2", value: "??? ms", n: props.n, r: props.r+1, b: props.b})
+                            inputValid.value = "error"
+                        }
                     }
                 }
             }
 
-            if(props.box.symbol == "ton-top" && data.value[0] == "T")
+            if(box.value.symbol == "ton-top" && data.value[0] == "T")
                     store.commit("setBox", {property: "blockData2", value: "100 ms", n: props.n, r: props.r+1, b: props.b})
-            inputValid.value = "correct"
+            
             store.commit("setBox", {property: "data", value: data.value, n: props.n, r: props.r, b: props.b})
             store.commit("setBox", {property: "name", value: boxInput.value, n: props.n, r: props.r, b: props.b})
-            localStorage.setItem("network",JSON.stringify(store.state.network))
-            localStorage.setItem("selected",JSON.stringify(store.state.selected))
             store.dispatch("saveInLocal") 
         }
 
@@ -95,29 +95,38 @@ export default {
             store.dispatch("select", {n: props.n, r: props.r, b: props.b, type:"box"})
         }
 
-        watch(() => props.box.input, () => {
-            boxInput.value = "???"
-            inputValid.value = ""
+        watch(() => box.value.name, () => {
+            if(store.state.network[props.n] && (store.state.network[props.n].row[props.r])){
+                boxInput.value = store.getters.box({property: "name", n: props.n, r: props.r, b: props.b})
+                sendData()
+            }
         })
 
         watch(() => store.state.symbolTable, () => {
-            if(props.box.input){
+            if(box.value.input){
                 if(data.value)
                     inputValid.value = "correct"
-                if(props.box.symbol != "center-input")
+                if(box.value.symbol != "center-input")
                     actualizeData()
             }
         }, {deep: true, })
 
+        var timerT = computed(() => {
+            if(store.state.run.run && data.value[0] == "T" && box.value.symbol == "ton-top"){
+                return store.state.run.stateTable[data.value[0]][data.value.substring(1) - 37].count
+            }
+            return 0
+        })
+
         var active = computed(() => {
-            if(data.value && store.state.run.run && /(cnc|cno)/.test(props.box.symbol)){
+            if(data.value && store.state.run.run && /(cnc|cno)/.test(box.value.symbol)){
                 var state = false
                 if(data.value[0] == "T")
                     state = store.state.run.stateTable[data.value[0]][data.value.substring(1) - 37].state
                 else
                     state = store.state.run.stateTable[data.value[0]][data.value.substring(1).split('.')[0]][data.value.substring(1).split('.')[1]]
 
-                if(props.box.symbol == "cnc")
+                if(box.value.symbol == "cnc")
                     state = !state
                 return state
                 
@@ -127,7 +136,7 @@ export default {
 
         var activeBefore = computed(() => {
             var state = false
-            if(data.value && store.state.run.run){
+            if((data.value || box.value.symbol == "line") && store.state.run.run){
                 if(props.b == 0)
                     state = true
                 else 
@@ -140,10 +149,12 @@ export default {
             if(store.state.run.run){
                 if(activeBefore.value)
                     state = active.value
-                if(!state && props.box.connectionTop)
+                if(!state && box.value.connectionTop)
                     state = store.getters.box({property: "activeAfter", n: props.n, r: props.r-1, b: props.b})
-                if(!state && props.box.connectionBottom)
-                     state = store.getters.box({property: "activeAfter", n: props.n, r: props.r+1, b: props.b}) 
+                if(!state && box.value.connectionBottom)
+                    state = store.getters.box({property: "activeAfter", n: props.n, r: props.r+1, b: props.b}) 
+                if(!state && box.value.symbol == "line")
+                    state = activeBefore.value
             }
             store.commit("setBox", {property: "activeAfter", value: state, n: props.n, r: props.r, b: props.b})
             state = store.getters.box({property: "activeAfter", n: props.n, r: props.r, b: props.b})
@@ -166,9 +177,7 @@ export default {
             }
         })
 
-
-
-        return {boxInput,selectBox,sendData,inputValid, active, activeAfter, activeBefore}
+        return {boxInput,selectBox,sendData,inputValid, active, activeAfter, activeBefore, box, timerT}
     }
 }
 </script>
@@ -244,6 +253,18 @@ export default {
         left: 0;
         height: 4px;
     }
+
+    .boxTimer{
+        position: absolute;
+        color: rgb(58, 171, 224);
+        left: 0;
+        width: 100%;
+        text-align: center;
+        top: 47px;
+        font-size: 20px;
+        z-index: 10;
+    }
+
     .symbol-contact .boxActiveBefore{
         width: 34px;
     }
@@ -265,6 +286,12 @@ export default {
     .boxActiveAfter{
         left: 66px;
     }
+
+    .symbol-line .boxActiveAfter, .symbol-line .boxActiveBefore{
+        left: 0;
+        width: 100px
+    }
+
     .boxActiveTop{
         position: absolute;
         background: rgb(58, 171, 224);

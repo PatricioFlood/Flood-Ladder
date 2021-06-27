@@ -6,6 +6,8 @@ export default{
             else
                 return ""
         }
+        if(property == undefined)
+            return state.network[n].row[r].box[b]
         return state.network[n].row[r].box[b][property]
     },
     row: (state) => ({property, n, r}) => {

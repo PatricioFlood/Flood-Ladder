@@ -16,22 +16,26 @@
                 </div>
                 <div class="subMenuBack" v-if="subMenu" @click="subMenu = false" @contextmenu="subMenu = false"/>
                 <alert v-if="alert" @close="alert = false" @check="deleteProject(true)">¿Eliminar el proyecto: "{{$store.state.name.replace('-', ' ')}}"?</alert>
-                <prompt v-if="prompt" @close="prompt = false" @check="renameProject" :prevInput="$store.state.name.replace('-', ' ')">Renombrar</prompt>
+                <prompt v-if="prompt.active" @close="prompt.active = false" @check="renameProject" :prevInput="$store.state.name.replace('-', ' ')">{{prompt.slot}}</prompt>
             </div>
         </div>
     </div>
 </template>
 <script>
-import { ref } from '@vue/reactivity'
+import { reactive, ref } from '@vue/reactivity'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import Alert from "@/components/alert/Alert.vue"
 import Prompt from "@/components/alert/Prompt.vue"
 export default {
+    name: "home",
     components: {Alert, Prompt},
     setup() {
         const alert = ref(false)
-        const prompt = ref(false)
+        const prompt = reactive({
+            slot: "Renombrar",
+            active: false
+        })
         const router = useRouter()
         const store = useStore()
         var localProjects = ref(store.getters.localProjects)
@@ -64,11 +68,16 @@ export default {
         }
         const renameProject = (name = "") => {
             if(!name){
-                prompt.value = true
+                prompt.slot = "Renombrar"
+                prompt.active = true
             } else {
-                prompt.value = false
-                store.dispatch("renameProject", name)
-                localProjects.value = store.getters.localProjects
+                if(localProjects.value.find(obj => obj.name == name.replace(" ", "-")) == undefined){
+                    prompt.active = false
+                    store.dispatch("renameProject", name)
+                    localProjects.value = store.getters.localProjects
+                } else {
+                    prompt.slot = "El nombre ya existe"
+                }
             }
             subMenu.value = false
         }
@@ -99,10 +108,13 @@ export default {
         height: 100px;
         display: flex;
         flex-direction: column;
+        text-align: center;
         align-items: center;
         justify-content: center;
         background: rgb(211, 211, 211);
         border-radius: 15%;
+        padding-top: 10px;
+        padding-bottom: 10px;
         cursor: pointer;
         user-select: none;
         -webkit-tap-highlight-color: rgba(0,0,0,0);

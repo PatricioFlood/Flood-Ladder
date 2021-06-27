@@ -127,12 +127,10 @@ export default{
             
 
         dispatch("select", {n, r: r+1, b: b+1, type: "box"})
-        localStorage.setItem("network",JSON.stringify(state.network))
-        localStorage.setItem("selected",JSON.stringify(state.selected))
         dispatch("saveInLocal") 
     },
 
-    putTop({getters, dispatch, state}, {n,r,b}){
+    putTop({getters, dispatch}, {n,r,b}){
         dispatch("resetConnection", {add: true, pos: "top", n, r, b})
 
         if(getters.box({property: "symbol", n, r: r, b: b+1}) == "continue")
@@ -145,8 +143,6 @@ export default{
             dispatch("putSymbol", {symbol: "line", type: "connect", n, r, b})
 
         dispatch("select", {n, r: r-1, b: b+1, type: "box"}) 
-        localStorage.setItem("network",JSON.stringify(state.network))
-        localStorage.setItem("selected",JSON.stringify(state.selected))
         dispatch("saveInLocal") 
     },
 
@@ -165,8 +161,6 @@ export default{
         commit("setRow", {property: "last", value: b, n, r})
         commit("setRow", {property: "final", value: b-1, n, r: r+1})
         commit("setRow", {property: "last", value: b-1, n, r: r+1})
-        localStorage.setItem("network",JSON.stringify(state.network))
-        localStorage.setItem("selected",JSON.stringify(state.selected))
         dispatch("saveInLocal") 
     },
 
@@ -196,9 +190,7 @@ export default{
         commit("setRow", {property: "final", value: b, n, r: r+1})
         commit("setRow", {property: "last", value: b, n, r: r+1})
         commit("setRow", {property: "final", value: b-1, n, r: r+2})
-        commit("setRow", {property: "last", value: b-1, n, r: r+2})    
-        localStorage.setItem("network",JSON.stringify(state.network))
-        localStorage.setItem("selected",JSON.stringify(state.selected))
+        commit("setRow", {property: "last", value: b-1, n, r: r+2})   
         dispatch("saveInLocal") 
     },
 
@@ -380,8 +372,6 @@ export default{
             dispatch("select", {n, r, b: b+1, type: "box"})
         }
 
-        localStorage.setItem("network",JSON.stringify(state.network))
-        localStorage.setItem("selected",JSON.stringify(state.selected))
         dispatch("saveInLocal") 
     },
 
@@ -420,11 +410,10 @@ export default{
                     getters.connection({pos: "top", n, r, b: b-1}) ||
                     (getters.connection({pos: "bottom", n, r, b: b-1}) && r > 0)
         )) return
+
+        if(b>0 && !symbolBefore &&  (getters.connection({pos: "top", n, r, b: b-1} || getters.connection({pos: "bottom", n, r, b: b-1}))))
+            dispatch("deleteSymbol",{n,r,b: b-1})
             
-        if(connection.top)
-            dispatch("resetConnection", {pos: "top", n, r, b})
-        if(connection.bottom)
-            dispatch("resetConnection", {pos: "bottom", n, r, b})
 
         if(b>0 && symbolBefore   && symbolBefore != "continue" && symbolBefore != "start" && symbol  ){
             dispatch("setSymbol", {symbol: "continue", type: "connect", n, r, b})
@@ -443,7 +432,8 @@ export default{
         if(getters.row({property: "last", n, r}) == b){
             var i = b-1
             for(i; i>=0; i--){
-                if(!isReplaceable(symbol))
+                const verifySymbol = getters.box({property: "symbol",n ,r, b:i})
+                if(verifySymbol && !isReplaceable(verifySymbol))
                     break
             }
             if(i == -1)
@@ -451,14 +441,16 @@ export default{
             commit("setRow", {property: "last", value: i, n, r})
         }
 
-        //Si es una row secundaria y esta vacia y se borra el primer box, borra la row entera 
-        if(b== 0 && r>0 && getters.row({property: "last", n, r}) == undefined){
+        if(connection.top && (!symbol || !getters.box({property: "symbol", n, r, b: b+1} || getters.row({property: "last", n, r} == undefined))))
+            dispatch("resetConnection", {pos: "top", n, r, b})
+        if(connection.bottom && (!symbol || !getters.box({property: "symbol", n, r, b: b+1} || getters.row({property: "last", n, r} == undefined))))
+            dispatch("resetConnection", {pos: "bottom", n, r, b})
+
+        //Si es una row secundaria y esta vacia, borra la row entera 
+        if(r>0 && getters.row({property: "last", n, r}) == undefined){
             dispatch("select", {n, r: r-1, b: 0, type:"box"})
             commit("deleteRow", {n, r})
         }
-            
-        localStorage.setItem("network",JSON.stringify(state.network))
-        localStorage.setItem("selected",JSON.stringify(state.selected))
         dispatch("saveInLocal") 
     },
 

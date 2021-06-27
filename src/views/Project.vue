@@ -2,7 +2,7 @@
         <div class="view">
             <router-view v-slot="{ Component }">
                 <keep-alive>
-                <component :is="Component" />
+                    <component :is="Component"/>
                 </keep-alive>
             </router-view>
         </div>
@@ -15,6 +15,7 @@ import { computed } from '@vue/runtime-core'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 export default {
+    name: "project",
     components: {PanelRun},
     setup() {
         const store = useStore()
@@ -23,7 +24,7 @@ export default {
         store.commit("setProjectName", route.params.name)
         store.dispatch("initialize")
         document.title = route.params.name.replace("-"," ") + " | Flood Ladder"
-        return{panelRun}
+        return{panelRun, store}
     },
 }
 </script>

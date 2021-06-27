@@ -154,7 +154,7 @@ export default{
         var rowsTot = state.network[n].row.length;
         if(r == rowsTot-1)
            dispatch("addRow", {n})
-        else if(getters.box({property: "symbol", n, r: r+1, b}) != "" || getters.box({property: "symbol", n, r: r+1, b: b+1}) != "" || getters.box({property: "symbol", n, r: r+1, b: b-1}) != "")
+        else if(getters.box({property: "symbol", n, r: r+1, b})   || getters.box({property: "symbol", n, r: r+1, b: b+1})   || getters.box({property: "symbol", n, r: r+1, b: b-1})  )
             dispatch("addRow", {n, r: r+1})
         
         dispatch("putSymbol", {symbol: "ton-top", type:"block", n, r, b})
@@ -179,9 +179,9 @@ export default{
         else{
             if(r == rowsTot-2)
                 dispatch("addRow", {n})
-            if(getters.box({property: "symbol", n, r: r+1, b}) != "" || getters.box({property: "symbol", n, r: r+1, b: b+1}) != "" || getters.box({property: "symbol", n, r: r+1, b: b-1}) != "")
+            if(getters.box({property: "symbol", n, r: r+1, b})   || getters.box({property: "symbol", n, r: r+1, b: b+1})   || getters.box({property: "symbol", n, r: r+1, b: b-1})  )
                 dispatch("addRow", {n, r: r+1})
-            if(getters.box({property: "symbol", n, r: r+2, b}) != "" || getters.box({property: "symbol", n, r: r+2, b: b+1}) != "" || getters.box({property: "symbol", n, r: r+2, b: b-1}) != "")
+            if(getters.box({property: "symbol", n, r: r+2, b})   || getters.box({property: "symbol", n, r: r+2, b: b+1})   || getters.box({property: "symbol", n, r: r+2, b: b-1})  )
                 dispatch("addRow", {n, r: r+2})
         } 
         
@@ -386,13 +386,12 @@ export default{
     },
 
     deleteSymbol({state, commit, dispatch, getters}, {n, r, b} = {n: state.selected.n, r: state.selected.r, b: state.selected.b}){
-
         const symbol = getters.box({property: "symbol", n, r, b})
         const symbolBefore = b>0 ? getters.box({property: "symbol", n, r, b: b-1}) : ""
         const connection = getters.connection({pos: "all", n, r, b})
         const data = getters.box({property: "data", n, r, b})
 
-        if(isContinue(symbol) || symbol == "center-input" || symbol == "ton-bottom")
+        if(symbol == "start" || symbol == "center-input" || symbol == "ton-bottom")
             return
 
         if(symbol == "ton-top"){
@@ -414,12 +413,20 @@ export default{
         
         dispatch("resetSymbol", {n, r, b})
 
+        if(symbol == "continue" && b>0 && (
+                    symbolBefore == "continue" || 
+                    symbolBefore == "start" ||
+                    isFinal(symbolBefore) ||
+                    getters.connection({pos: "top", n, r, b: b-1}) ||
+                    (getters.connection({pos: "bottom", n, r, b: b-1}) && r > 0)
+        )) return
+            
         if(connection.top)
             dispatch("resetConnection", {pos: "top", n, r, b})
         if(connection.bottom)
             dispatch("resetConnection", {pos: "bottom", n, r, b})
 
-        if(b>0 && symbolBefore != "" && symbolBefore != "continue" && symbolBefore != "start" && symbol != ""){
+        if(b>0 && symbolBefore   && symbolBefore != "continue" && symbolBefore != "start" && symbol  ){
             dispatch("setSymbol", {symbol: "continue", type: "connect", n, r, b})
         }
         else if(b==0 && r==0)
@@ -469,7 +476,7 @@ export default{
             name: state.name,
             ladder: copyNetwork,
             symbolTable: state.symbolTable.map(obj => Object.values(obj)),
-            date: Date.now()-10800000
+            date: new Date()
         })
         localStorage.setItem("localProjects", JSON.stringify(localProjects))
     },

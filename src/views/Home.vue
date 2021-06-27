@@ -73,12 +73,16 @@ export default {
             subMenu.value = false
         }
         const getDate = (date) => {
-            const dateNow = new Date(Date.now()-10800000)
+            const dateNow = new Date()
             date = new Date(date)
-            if(date.getUTCDay() == dateNow.getUTCDay() && date.getUTCMonth() == dateNow.getUTCMonth() && date.getUTCFullYear() == dateNow.getUTCFullYear())
-                return (date.getUTCHours()>9?"":"0") + date.getUTCHours() + ":" + (date.getUTCMinutes()>9?"":"0") + date.getUTCMinutes() + "hs" 
-            
-            return (date.getUTCDay()>9?"":"0") + date.getUTCDay() + "/" + (date.getUTCMonth()>9?"":"0") + date.getUTCMonth() + "/" + date.getUTCFullYear()
+            if(date.getDate() == dateNow.getDate() && date.getMonth() == dateNow.getMonth() && date.getFullYear() == dateNow.getFullYear())
+                return (date.getHours()>9?"":"0") + date.getHours() + ":" + (date.getMinutes()>9?"":"0") + date.getMinutes() + "hs" 
+
+                const day = date.getDate()
+                const month = parseInt(date.getMonth())+1
+                const year = date.getFullYear()
+                
+            return (day>9?"":"0") + day + "/" + (month>9?"":"0") + month + "/" + year
         }
         const subMenu = ref(false)
         document.title = "Flood Ladder"

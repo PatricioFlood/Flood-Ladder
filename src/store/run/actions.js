@@ -45,7 +45,8 @@ export default{
                 }
                 if(b == newBoxInit){
                     line.push("O" + (rootState.network[n].row[r].box[b].symbol=="cnc"?"N ":" ") + rootState.network[n].row[r].box[newBoxInit].data)
-                    if(rootState.network[n].row[r].box[b].bottom) checkBottomBefore(n,r+1,b)
+                    if(rootState.network[n].row[r].box[b].connectionBottom)
+                        checkBottomBefore(n,r+1,b)
                 }
                 else{
                     S7compiler(n, r, newBoxInit, b)
@@ -59,7 +60,6 @@ export default{
             for(let b = boxInit; b<=boxEnd; b++){
                 const symbol = rootState.network[n].row[row].box[b].symbol
                 const data = rootState.network[n].row[row].box[b].data
-                const bottom = rootState.network[n].row[row].box[b].connectionBottom
                 if(b != boxInit && b != boxEnd && rootState.network[n].row[row].box[b-1].connectionBottom && rootState.network[n].row[row+1].box[b].symbol){
                     let hasTop = false
                     let newBoxEnd = b
@@ -88,18 +88,20 @@ export default{
 
                     line.push(((b==boxInit && init)?"LD":"A") + (symbol=="cnc"?"N ":" ") + data)
 
-                } else if(symbol == "coil" || symbol == "set" || symbol == "reset"){
+                } else {
+                    if(symbol == "coil" || symbol == "set" || symbol == "reset"){
                     line.push((symbol=="coil"?"= ":symbol=="set"?"S ":"R ") + data + (symbol=="coil"?"":", 1"))
-                } else if(symbol == "ton-top"){
+                    } else if(symbol == "ton-top"){
                     line.push("TON " + data + ", " + rootState.network[n].row[row+1].box[b-1].data)
-                }
-                if(b == boxEnd && rootState.network[n].row[row].box[b-1].connectionBottom){
-                    row = row+1
-                    b = b-1
-                    boxEnd = rootState.network[n].row[row].last
+                    }
+                    if(rootState.network[n].row[row].box[b-1].connectionBottom){
+                        row = row+1
+                        b = b-1
+                        boxEnd = rootState.network[n].row[row].last
+                    }
                 }
 
-                if(bottom){
+                if(rootState.network[n].row[row].box[b].connectionBottom){
                     if(!checkBottomBefore(n,row+1,b)) return
                 }
                 
@@ -176,7 +178,7 @@ export default{
                 sentence += image + "="
                 sentence += funct=="R"?"false":"true"
                 if(funct == "=")
-                    stackElse[stackElse.length-1] += image + "=false"
+                    stackElse[stackElse.length-1] += image + "=false;"
             }
             if(funct == "TON"){
                 sentence += "if(!" + image + ".init){"+ image +".init = Date.now()}"

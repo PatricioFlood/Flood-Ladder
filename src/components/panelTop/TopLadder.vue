@@ -70,10 +70,9 @@ export default {
                 store.dispatch("deleteSymbol")
         }
         const selected = computed(() => store.state.selected)
-        const run = computed(() => store.state.run.panelRun)
 
         const canPut = computed(() => {
-            if(store.getters.box({property: "symbol"}) == "center-input" || selected.value.type == 'network')
+            if(store.getters.box({property: "symbol"}) == "center-input" || selected.value.type == 'network' || store.state.run.run)
                 return false
             return store.getters.selectedFinal !== undefined ? (selected.value.b <= store.getters.selectedFinal) : true
         })
@@ -94,12 +93,25 @@ export default {
                 return false
         })
         const canDelete = computed(() => {
+            if(store.state.run.run) return false
             if(selected.value.type == 'network') return true
-            var symbol = store.getters.box({property: "symbol"})
-            return (selected.value.type == 'box' && symbol != "center-input" && symbol != "start" && symbol != "continue")
+            if(selected.value.type == 'aux') return false
+
+            const symbol = store.getters.box({property: "symbol"})
+            const symbolBefore = selected.value.b>0 ? store.getters.box({property: "symbol", n: selected.value.n, r: selected.value.r, b: selected.value.b-1}) : ""
+
+            if(symbol == "continue" && selected.value.b>0 && (
+                    symbolBefore == "continue" || 
+                    symbolBefore == "start" || !symbolBefore ||
+                    /coil|reset|set|ton-top|ctu-top|deleteInput/.test(symbolBefore) ||
+                    store.getters.connection({pos: "top", n: selected.value.n, r: selected.value.r, b: selected.value.b-1}) ||
+                    (selected.value.r > 0 && store.getters.connection({pos: "bottom",  n: selected.value.n, r: selected.value.r, b: selected.value.b-1}))
+            )) return true
+            
+            return (symbol != "center-input" && symbol != "start" && symbol != "continue")
         })
 
-        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, run, backMenu, openMenu}
+        return{putSymbol, deleteSymbol, menu, closeMenu, selected, canPut, canPutFinal, canPutTop, canDelete, backMenu, openMenu}
     },
 }
 </script>

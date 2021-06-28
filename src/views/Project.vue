@@ -23,7 +23,7 @@ export default {
         const panelRun = computed(() => store.state.run.panelRun)
         store.commit("setProjectName", route.params.name)
         store.dispatch("initialize")
-        document.title = route.params.name.replace("-"," ") + " | Flood Ladder"
+        document.title = route.params.name.replaceAll("-"," ") + " | Flood Ladder"
         return{panelRun, store}
     },
 }

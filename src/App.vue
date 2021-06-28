@@ -39,7 +39,7 @@ export default {
         height: var(--vh);
         display: flex;
         flex-direction: column;
-        width: 300px;
+        min-width: 250px;
         flex-shrink: 0;
         flex-grow: 1;
     }

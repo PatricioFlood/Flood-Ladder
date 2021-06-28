@@ -62,6 +62,8 @@ export default {
                                 store.commit("setBox", {property: "blockData2", value: "??? ms", n: props.n, r: props.r+1, b: props.b})
                             inputValid.value = "error"
                         }
+                        else
+                            inputValid.value = "correct"
                     }
                 }
             }

@@ -482,7 +482,7 @@ export default{
     renameProject({state,getters}, name){
         const local = getters.localProjects
         if(local.find(proj => proj.name == state.name)){
-            local[local.findIndex(proj => proj.name == state.name)].name = name.replace(" ", "-")
+            local[local.findIndex(proj => proj.name == state.name)].name = name.replaceAll(" ", "-")
             localStorage.setItem("localProjects", JSON.stringify(local))
         }   
     }

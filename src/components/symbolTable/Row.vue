@@ -58,7 +58,7 @@ export default {
                 verify.symbol = ""
                 const regex = /^[A-Za-zÀ-ÿ][\w À-ÿ]*$/
                 if(regex.test(table.symbol)){
-                    table.symbol = table.symbol.replace(" ","_")
+                    table.symbol = table.symbol.replaceAll(" ","_")
                     for(let [i, row] of store.state.symbolTable.entries()){
                         if(i != props.row && row.symbol == table.symbol){
                             verify.symbol = "repeat"

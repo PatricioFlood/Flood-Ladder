@@ -1,22 +1,24 @@
 <template>
     <div class="home" @contextmenu.prevent>
         <div class="project" @click="newProject">Nuevo Proyecto</div>
-        <div v-show="localProjects.length>0">
-            <h2 class="scratchs">Borradores</h2>
-            <div class="localProjects"  id="localProjects">
-                <div class="project" v-for="project of localProjects" :key="project.date" @click="openProject(project.name)"
-                @contextmenu="openSubMenu($event, project.name)">{{project.name.replace("-", " ")}}
-                <p class="date">{{getDate(project.date)}}</p>
+        <div class="projects-position">
+            <div v-show="localProjects.length>0" class="projects-container">
+                <h2 class="scratchs">Borradores</h2>
+                <div class="localProjects"  id="localProjects">
+                    <div class="project" v-for="project of localProjects" :key="project.date" @click="openProject(project.name)"
+                    @contextmenu="openSubMenu($event, project.name)">{{project.name.replaceAll("-", " ")}}
+                    <p class="date">{{getDate(project.date)}}</p>
+                    </div>
+                    <div class="subMenu" v-if="subMenu">
+                        <ul>
+                            <li @click="deleteProject()"><span class="material-icons" style="color: #D44242">delete</span>Eliminar</li>
+                            <li @click="renameProject()"><span class="material-icons" style="color: #88867D">edit</span>Renombrar</li>
+                        </ul>
+                    </div>
+                    <div class="subMenuBack" v-if="subMenu" @click="subMenu = false" @contextmenu="subMenu = false"/>
+                    <alert v-if="alert" @close="alert = false" @check="deleteProject(true)">¿Eliminar el proyecto: "{{$store.state.name.replaceAll('-', ' ')}}"?</alert>
+                    <prompt v-if="prompt.active" @close="prompt.active = false" @check="renameProject" :prevInput="$store.state.name.replaceAll('-', ' ')">{{prompt.slot}}</prompt>
                 </div>
-                <div class="subMenu" v-if="subMenu">
-                    <ul>
-                        <li @click="deleteProject()"><span class="material-icons" style="color: #D44242">delete</span>Eliminar</li>
-                        <li @click="renameProject()"><span class="material-icons" style="color: #88867D">edit</span>Renombrar</li>
-                    </ul>
-                </div>
-                <div class="subMenuBack" v-if="subMenu" @click="subMenu = false" @contextmenu="subMenu = false"/>
-                <alert v-if="alert" @close="alert = false" @check="deleteProject(true)">¿Eliminar el proyecto: "{{$store.state.name.replace('-', ' ')}}"?</alert>
-                <prompt v-if="prompt.active" @close="prompt.active = false" @check="renameProject" :prevInput="$store.state.name.replace('-', ' ')">{{prompt.slot}}</prompt>
             </div>
         </div>
     </div>
@@ -71,7 +73,7 @@ export default {
                 prompt.slot = "Renombrar"
                 prompt.active = true
             } else {
-                if(localProjects.value.find(obj => obj.name == name.replace(" ", "-")) == undefined){
+                if(localProjects.value.find(obj => obj.name == name.replaceAll(" ", "-")) == undefined){
                     prompt.active = false
                     store.dispatch("renameProject", name)
                     localProjects.value = store.getters.localProjects
@@ -102,8 +104,14 @@ export default {
 <style scoped>
     .home{
         padding: 20px;
+        padding-top: 10px;
+        display: flex;
+        flex-direction: column;
+        background: rgb(24, 121, 121);
+        height: 100%;
     }
     .project{
+        margin-top: 10px;
         width: 100px;
         height: 100px;
         display: flex;
@@ -131,15 +139,24 @@ export default {
     .project:hover, .project:active{
         opacity: 0.8;
     }
+    .projects-position{
+        display: flex;
+        width: 100%
+    }
+    .projects-container{
+        width: 270px;
+        flex-grow: 1;
+    }
     .localProjects{
         display: flex;
+        flex-wrap: wrap;
     }
     .localProjects .project{
         margin-right: 10px;
     }
     .scratchs{
         margin-top: 20px;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         color: rgb(162, 207, 198);
         font-size: 20px;
         width: 100%;

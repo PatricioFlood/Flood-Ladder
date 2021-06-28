@@ -5,53 +5,55 @@
             <button @click="stopLadder" v-show="run" class="stop"><span class="material-icons">stop</span></button>
             <button @click="closePanel" v-show="!run"><span class="material-icons">close</span></button>
         </div>
-        <div class="content">
-            <div class="buttons-ligths">
-                <div class="buttons">
-                    <div v-for="button of pushButtons" :key="button.direction" 
-                    :class="[
-                    'push-button', 
-                    {'red': /([rR][oO][jJ][Oo])|([nN][cC])/.test(button.comment) && !/[vV][eE][rR][dD][eE]/.test(button.comment)},
-                    {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oO]/.test(button.comment)},
-                    {'font16px': (button.symbol||button.direction).length > 8},
-                    {'font14px': (button.symbol||button.direction).length > 11}
-                    ]" 
-                    @mousedown="setI(button)" @mouseup="resetI(button)" 
-                    @touchstart.passive="setI(button)" @touchend.passive="resetI(button)">
-                    <p>{{button.symbol||button.direction}}</p>
-                    <div class="nc" v-show="/[nN][cC]/.test(button.comment)">NC</div>
+        <div class="content-position">
+            <div class="content">
+                <div class="buttons-ligths">
+                    <div class="buttons">
+                        <div v-for="button of pushButtons" :key="button.direction" 
+                        :class="[
+                        'push-button', 
+                        {'red': /([rR][oO][jJ][Oo])|([nN][cC])/.test(button.comment) && !/[vV][eE][rR][dD][eE]/.test(button.comment)},
+                        {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oO]/.test(button.comment)},
+                        {'font16px': (button.symbol||button.direction).length > 8},
+                        {'font14px': (button.symbol||button.direction).length > 11}
+                        ]" 
+                        @mousedown="setI(button)" @mouseup="resetI(button)" 
+                        @touchstart.passive="setI(button)" @touchend.passive="resetI(button)">
+                        <p>{{button.symbol||button.direction}}</p>
+                        <div class="nc" v-show="/[nN][cC]/.test(button.comment)">NC</div>
+                        </div>
+                    </div>
+                    <div class="ligths">
+                        <div v-for="ligth of ligths" :key="ligth.direction"
+                        :class="[
+                        'pilot-ligth',
+                        {'on': Q[ligth.direction.substring(1).split('.')[0]][ligth.direction.substring(1).split('.')[1]]},
+                        {'red': /[rR][oO][jJ][OoaA]/.test(ligth.comment)},
+                        {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oOaA]/.test(ligth.comment)},
+                        {'blue': /[aA][zZ][uU][lL]/.test(ligth.comment)},
+                        {'font13px': (ligth.symbol||ligth.direction).length > 9}
+                        ]">
+                        <p>{{ligth.symbol||ligth.direction}}</p>
+                        </div>
                     </div>
                 </div>
-                <div class="ligths">
-                    <div v-for="ligth of ligths" :key="ligth.direction"
-                    :class="[
-                    'pilot-ligth',
-                    {'on': Q[ligth.direction.substring(1).split('.')[0]][ligth.direction.substring(1).split('.')[1]]},
-                    {'red': /[rR][oO][jJ][OoaA]/.test(ligth.comment)},
-                    {'yellow': /[aA][mM][aA][rR][iI][lL][lL][oOaA]/.test(ligth.comment)},
-                    {'blue': /[aA][zZ][uU][lL]/.test(ligth.comment)},
-                    {'font13px': (ligth.symbol||ligth.direction).length > 9}
-                    ]">
-                    <p>{{ligth.symbol||ligth.direction}}</p>
+                <div class="table" v-if="variables.length>0 || timers.length>0">
+                    <div class="variables" v-if="variables.length>0">
+                        <div class="tableTitle">Variables</div>
+                        <div>Direccion</div><div>Estado</div>
+                        <template v-for="variable of variables" :key="variable.direction">
+                            <div>{{variable.direction}}</div><div>{{V[variable.direction.substring(1).split('.')[0]][variable.direction.substring(1).split('.')[1]]?1:0}}</div>
+                        </template>
                     </div>
-                </div>
-            </div>
-            <div class="table" v-if="variables.length>0 || timers.length>0">
-                <div class="variables" v-if="variables.length>0">
-                    <div class="tableTitle">Variables</div>
-                    <div>Direccion</div><div>Estado</div>
-                    <template v-for="variable of variables" :key="variable.direction">
-                        <div>{{variable.direction}}</div><div>{{V[variable.direction.substring(1).split('.')[0]][variable.direction.substring(1).split('.')[1]]?1:0}}</div>
-                    </template>
-                </div>
-                <div class="timers" v-if="timers.length>0">
-                    <div class="tableTitle2">Temporizadores</div>
-                    <div>Direccion</div><div>Tiempo</div><div>Estado</div>
-                    <template v-for="timer of timers" :key="timer.direction">
-                        <div>{{timer.direction}}</div>
-                        <div>{{T[parseInt(timer.direction.substring(1))-37].count}}</div>
-                        <div>{{T[parseInt(timer.direction.substring(1))-37].state?1:0}}</div>
-                    </template>
+                    <div class="timers" v-if="timers.length>0">
+                        <div class="tableTitle2">Temporizadores</div>
+                        <div>Direccion</div><div>Tiempo</div><div>Estado</div>
+                        <template v-for="timer of timers" :key="timer.direction">
+                            <div>{{timer.direction}}</div>
+                            <div>{{T[parseInt(timer.direction.substring(1))-37].count}}</div>
+                            <div>{{T[parseInt(timer.direction.substring(1))-37].state?1:0}}</div>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
@@ -135,9 +137,11 @@ export default {
         align-items: center;
         justify-content: center;
         user-select: none;
-        flex-grow: 0.3
+        flex-grow: 0.3;
+        flex-wrap: wrap;
     }
     .variables{
+        margin: 10px;
         display: grid;
         width: 200px;
         grid-template-columns: repeat(2, 1fr);
@@ -149,8 +153,7 @@ export default {
         padding: 2px;
     }
     .timers{
-        margin-left: 10px;
-        margin-right: 10px;
+        margin: 10px;
         display: grid;
         width: 200px;
         grid-template-columns: repeat(3, 1fr);
@@ -173,6 +176,11 @@ export default {
         padding: 5px 10px;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.205);
     }
+    .content-position{
+        display: flex;
+        width: 100%;
+        overflow: auto;
+    }
     .content{
         display: flex;
         overflow: auto;
@@ -180,6 +188,8 @@ export default {
         align-items: center;
         justify-content: space-around;
         flex-wrap: wrap;
+        width: 270px;
+        flex-grow: 1;
     }
     .runstop span{
         font-size: 35px;

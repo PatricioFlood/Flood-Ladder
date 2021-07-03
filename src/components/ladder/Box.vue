@@ -1,6 +1,7 @@
 <template>
     <div class="box" @click="selectBox" :class="[{'selected' : box.selected}, box.cssClass, {'symbol-top' : box.connectionTop}, {'symbol-bottom' : box.connectionBottom}]">
-        <input type="text" @focus="$event.target.select()" v-model="boxInput" v-if="box.input" @blur="sendData" @keyup.enter="sendData" :class="inputValid" spellcheck="false">
+        <input :readonly="run" type="text" @focus="!run?$event.target.select():''" v-model="boxInput" v-if="box.input" 
+        @blur="sendData" @keyup.enter="sendData" :class="inputValid" spellcheck="false">
         <div class="block-data1" v-show="box.blockData1">{{box.blockData1}}</div>
         <div class="block-data2" v-show="box.blockData2">{{box.blockData2}}</div>
         <div class="box-background"></div>
@@ -113,6 +114,8 @@ export default {
             }
         }, {deep: true, })
 
+        const run = computed(() => store.state.run.run)
+
         var timerT = computed(() => {
             if(store.state.run.run && data.value[0] == "T" && box.value.symbol == "ton-top"){
                 return store.state.run.stateTable[data.value[0]][data.value.substring(1) - 37].count
@@ -179,7 +182,7 @@ export default {
             }
         })
 
-        return {boxInput,selectBox,sendData,inputValid, active, activeAfter, activeBefore, box, timerT}
+        return {boxInput,selectBox,sendData,inputValid, active, activeAfter, activeBefore, box, timerT, run}
     }
 }
 </script>

@@ -3,9 +3,9 @@
         <transition>
             <div v-show="show" class="menu">  
                 <ul v-show="$route.name != 'home'">
-                    <li @click="pushHome"><span class="material-icons" style="color: #2DACA1">home</span>Inicio</li>
                     <li @click="openView('symbolTable')" v-show="$route.name != 'symbolTable'"><span class="material-icons" style="color: #2DACA1">backup_table</span>Tabla de Símbolos</li>
                     <li @click="openView('ladder')" v-show="$route.name != 'ladder'"><span class="material-icons" style="color: #2DACA1">description</span>Bloque de Programa</li>
+                    <li @click="pushHome"><span class="material-icons" style="color: #2DACA1">home</span>Inicio</li>
                     <li @click="openPanelRun()" v-show="!run"><span class="material-icons" style="color: #6BB464">play_arrow</span>Simulación</li>
                     <li @click="resetNetworks()" v-show="$route.name == 'ladder'"><span class="material-icons" style="color: #A03C3C">delete</span>Vaciar Networks</li>
                     <li @click="generateFile()"><span class="material-icons" style="color: #428DD4">download</span>Descargar Archivo</li>

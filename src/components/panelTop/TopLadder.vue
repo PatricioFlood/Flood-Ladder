@@ -166,6 +166,10 @@ export default {
 .panel-top button:active{
     opacity: 0.9;
 }
+.panel-top button:disabled{
+    opacity: 0.5;
+    cursor: default;
+}
 .menu{
     display: none;
     margin-left: auto;

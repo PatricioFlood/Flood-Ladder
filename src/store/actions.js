@@ -126,7 +126,7 @@ export default{
         
             
 
-        dispatch("select", {n, r: r+1, b: b+1, type: "box"})
+        dispatch("select", {n, r: r+1, b: b, type: "box"})
         dispatch("saveInLocal") 
     },
 

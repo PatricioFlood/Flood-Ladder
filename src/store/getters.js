@@ -32,8 +32,8 @@ export default{
 
     searchSymbolTable: (state) => (symbol) => {
         for(let row of state.symbolTable){
-            if(row.symbol == symbol)
-                return row.direction
+            if(row.symbol.toLowerCase() == symbol.toLowerCase() )
+                return {direction: row.direction, symbol: row.symbol}
         }
         return ""
     },

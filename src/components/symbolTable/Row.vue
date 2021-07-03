@@ -62,6 +62,7 @@ export default {
                     for(let [i, row] of store.state.symbolTable.entries()){
                         if(i != props.row && row.symbol == table.symbol){
                             verify.symbol = "repeat"
+                            store.commit("setSymbolTable", {property, value: "", row: props.row})
                             return 
                         }
                     }
@@ -72,8 +73,8 @@ export default {
                 }
             }
             store.commit("setSymbolTable", {property, value: table[property], row: props.row})
-            store.commit("orderSymbolTable")
         }
+            
         
         watch(() => store.state.symbolTable[props.row], () => {
             if(store.state.symbolTable[props.row]){
@@ -82,6 +83,13 @@ export default {
                 table.comment = store.state.symbolTable[props.row].comment
             }
         })
+
+        watch(() => store.state.symbolTable, () => {
+            if(verify.symbol == "repeat"){
+                setTable("symbol")
+                setTable("direction")
+            }
+        }, {deep: true})
 
         return{table, setTable, verify, deleteRow}
     },

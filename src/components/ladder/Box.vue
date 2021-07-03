@@ -1,16 +1,21 @@
 <template>
-    <div class="box" @click="selectBox" :class="[{'selected' : box.selected}, box.cssClass, {'symbol-top' : box.connectionTop}, {'symbol-bottom' : box.connectionBottom}]">
-        <input :readonly="run" type="text" @focus="!run?$event.target.select():''" v-model="boxInput" v-if="box.input" 
-        @blur="sendData" @keyup.enter="sendData" :class="inputValid" spellcheck="false">
-        <div class="block-data1" v-show="box.blockData1">{{box.blockData1}}</div>
-        <div class="block-data2" v-show="box.blockData2">{{box.blockData2}}</div>
-        <div class="box-background"></div>
-        <div class="boxActive" v-if="active"></div>
-        <div class="boxActiveAfter" v-if="activeAfter"></div>
-        <div class="boxActiveBefore" v-if="activeBefore"></div>
-        <div class="boxActiveBottom" v-if="activeAfter && box.connectionBottom"></div>
-        <div class="boxActiveTop" v-if="activeAfter && box.connectionTop"></div>
-        <div class="boxTimer" v-if="timerT">{{timerT}}</div>
+    <div class="boxContainer">
+        <div class="box" @click="selectBox" :class="[{'selected' : box.selected}, box.cssClass, {'symbol-top' : box.connectionTop}, {'symbol-bottom' : box.connectionBottom}]">
+            <input :readonly="run" type="text" @focus="$event.target.select()" :value="boxInput" v-if="box.input" 
+            @blur="onBlurInput" @keyup.enter="inputEnter" :class="inputValid" spellcheck="false" @input="e => getFilterSymbols(e.target.value)">
+            <div class="block-data1" v-show="box.blockData1">{{box.blockData1}}</div>
+            <div class="block-data2" v-show="box.blockData2">{{box.blockData2}}</div>
+            <div class="box-background"></div>
+            <div class="boxActive" v-if="active"></div>
+            <div class="boxActiveAfter" v-if="activeAfter"></div>
+            <div class="boxActiveBefore" v-if="activeBefore"></div>
+            <div class="boxActiveBottom" v-if="activeAfter && box.connectionBottom"></div>
+            <div class="boxActiveTop" v-if="activeAfter && box.connectionTop"></div>
+            <div class="boxTimer" v-if="timerT">{{timerT}}</div>
+        </div>
+        <ul class="hintlist" v-if="filterSymbols.length > 0 && showHint">
+            <li v-for="symbol in filterSymbols" :key="symbol" @mousedown.prevent="selectHint(symbol)">{{symbol}}</li>
+        </ul>
     </div>
 </template>
 <script>
@@ -57,26 +62,54 @@ export default {
                         }
                         inputValid.value = "correct"
                     } else {
-                        data.value = store.getters.searchSymbolTable(boxInput.value)
+                        const search = store.getters.searchSymbolTable(boxInput.value)
+                        data.value = search.direction
                         if(!data.value){
                             if(box.value.symbol == "ton-top")
                                 store.commit("setBox", {property: "blockData2", value: "??? ms", n: props.n, r: props.r+1, b: props.b})
                             inputValid.value = "error"
                         }
-                        else
+                        else{
+                            boxInput.value = search.symbol
                             inputValid.value = "correct"
+                        }
                     }
                 }
             }
 
-            if(box.value.symbol == "ton-top" && data.value[0] == "T")
+            if(box.value.symbol == "ton-top" && data.value && data.value[0] == "T")
                     store.commit("setBox", {property: "blockData2", value: "100 ms", n: props.n, r: props.r+1, b: props.b})
             
             store.commit("setBox", {property: "data", value: data.value, n: props.n, r: props.r, b: props.b})
             store.commit("setBox", {property: "name", value: boxInput.value, n: props.n, r: props.r, b: props.b})
             store.dispatch("saveInLocal") 
         }
-
+        const inputEnter = () => {
+            if(filterSymbols.value.length > 0){
+                boxInput.value = filterSymbols.value[0]
+            }
+            sendData()
+            showHint.value = false
+        }
+        const onBlurInput = () => {
+            sendData()
+            showHint.value = false
+        }
+        const selectHint = (symbol) => {
+            boxInput.value = symbol
+            sendData()
+            showHint.value = false
+        }
+        var showHint = ref(false)
+        var filterSymbols = ref([])
+        const getFilterSymbols = (value) => {
+            boxInput.value = value
+            showHint.value = true
+            if (/ctu|ton|input/.test(box.value.symbol)) filterSymbols.value = []
+            else filterSymbols.value = store.state.symbolTable
+                .filter(row => row.symbol && row.symbol !== boxInput.value && row.symbol.toLowerCase().startsWith(boxInput.value.toLowerCase()))
+                .map(row => row.symbol)
+        }
         const actualizeData = () => {
                 let symbol = store.getters.searchSymbolTableByDirection(data.value)
                 if(symbol){
@@ -182,11 +215,14 @@ export default {
             }
         })
 
-        return {boxInput,selectBox,sendData,inputValid, active, activeAfter, activeBefore, box, timerT, run}
+        return {boxInput,selectBox,sendData,inputValid, active, activeAfter, activeBefore, box, timerT, run, filterSymbols, showHint, inputEnter, onBlurInput, selectHint, getFilterSymbols}
     }
 }
 </script>
 <style scoped>
+.boxContainer{
+    position: relative;
+}
 .box{
     width: 100px;
     height: 60px;
@@ -211,6 +247,31 @@ export default {
     }
     input:focus, input:focus{
         outline: none;
+    }
+    .hintlist{
+        position: absolute;
+        top: 20px;
+        z-index: 20;
+        box-shadow: 0 0 5px black;
+        font-size: 15px;
+        width: 100%;
+        text-align: center;
+        max-height: 100px;
+        overflow-y: scroll;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    }
+    .hintlist::-webkit-scrollbar { /* WebKit */
+        width: 0;
+        height: 0;
+    }
+    .hintlist li{
+        padding: 5px 2px;
+        background: white;
+        cursor: pointer;
+    }
+    .hintlist li:hover{
+        background: rgb(194, 192, 192);
     }
     .block-data1, .block-data2{
         width: 100%;

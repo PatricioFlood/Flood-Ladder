@@ -15,7 +15,7 @@
     </div>
 </template>
 <script>
-import { computed, ref } from '@vue/runtime-core'
+import { computed, onDeactivated, ref } from '@vue/runtime-core'
 import {useStore} from "vuex"
 import Row from "@/components/symbolTable/Row.vue"
 import Alert from "@/components/alert/Alert.vue"
@@ -36,6 +36,9 @@ export default {
                 store.commit("resetSymbolTable")
             }
         }
+        onDeactivated(() => {
+            store.commit("orderSymbolTable")
+        })
         return{symbolTable, addRow, deleteTable, alert}
     },
 }

@@ -60,7 +60,7 @@ export default {
 
         const pasteNetwork = () => {
             store.commit("addAuxRow")
-            store.commit("insertNetwork", {copyIndex: copyIndex.value, insertIndex: selected.value.n})
+            store.commit("insertNetwork", {copyIndex: copyIndex.value, insertIndex: selected.value.n-1})
             store.dispatch("saveInLocal")
             copyIndex.value = null
         }

@@ -1,6 +1,6 @@
 <template>
     <div class="panelRun" id="panelRun">
-        <div class="runstop" @mousedown="drag" @touchstart.prevent="dragMobile">
+        <div class="runstop" @mousedown="drag" @touchstart.passive.stop="dragMobile">
             <button @click="runLadder" v-show="!run" class="run"><span class="material-icons">play_arrow</span></button>
             <button @click="stopLadder" v-show="run" class="stop"><span class="material-icons">stop</span></button>
             <button @click="closePanel" v-show="!run"><span class="material-icons">close</span></button>
@@ -137,7 +137,7 @@ export default {
                 panelRun.style.height = panelRun.offsetHeight - e.changedTouches[0].clientY + dragY + "px";
                 dragY = e.changedTouches[0].clientY;
             }
-            // remove rouch-move listener on touch-end
+            // remove rouch-move listener on ouch-end
             document.ontouchend = () => document.ontouchmove = document.ontouchend = null;
         }
 
@@ -198,6 +198,9 @@ export default {
         justify-content: space-between;
         padding: 5px 10px;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.205);
+        cursor: n-resize;
+        user-select: none;
+        touch-action: none;
     }
     .content-position{
         display: flex;
@@ -226,10 +229,6 @@ export default {
     }
     .runstop button:hover{
         opacity: 0.8;
-    }
-    .runstop{
-        cursor: n-resize;
-        user-select: none;
     }
     .run{
         color: green;

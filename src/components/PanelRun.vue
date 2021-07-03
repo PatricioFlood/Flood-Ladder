@@ -1,6 +1,6 @@
 <template>
-    <div class="panelRun">
-        <div class="runstop">
+    <div class="panelRun" id="panelRun">
+        <div class="runstop" @mousedown="drag" @touchstart.prevent="dragMobile">
             <button @click="runLadder" v-show="!run" class="run"><span class="material-icons">play_arrow</span></button>
             <button @click="stopLadder" v-show="run" class="stop"><span class="material-icons">stop</span></button>
             <button @click="closePanel" v-show="!run"><span class="material-icons">close</span></button>
@@ -118,7 +118,30 @@ export default {
             store.commit("setPanelRun", false)
         }
 
-        return{Q, setI, resetI, run, runLadder, stopLadder, closePanel, pushButtons, ligths, timers, T, counters, C, variables, V}
+        const drag = (e) =>{
+            let dragY = e.clientY;
+            const panelRun = document.getElementById("panelRun");
+            document.onmousemove = function onMouseMove(e) {
+                panelRun.style.maxHeight = "100%";
+                panelRun.style.height = panelRun.offsetHeight - e.clientY + dragY + "px";
+                dragY = e.clientY;
+            }
+            // remove mouse-move listener on mouse-up
+            document.onmouseup = () => document.onmousemove = document.onmouseup = null; 
+        }
+        const dragMobile = (e) =>{
+            let dragY = e.clientY;
+            const panelRun = document.getElementById("panelRun");
+            document.ontouchmove = (e) => {
+                panelRun.style.maxHeight = "100%";
+                panelRun.style.height = panelRun.offsetHeight - e.changedTouches[0].clientY + dragY + "px";
+                dragY = e.changedTouches[0].clientY;
+            }
+            // remove rouch-move listener on touch-end
+            document.ontouchend = () => document.ontouchmove = document.ontouchend = null;
+        }
+
+        return{Q, setI, resetI, run, runLadder, stopLadder, closePanel, pushButtons, ligths, timers, T, counters, C, variables, V, drag, dragMobile}
     },
 }
 </script>
@@ -129,7 +152,7 @@ export default {
         flex-direction: column;
         background: rgb(216, 253, 246);
         max-height: 50%;
-        padding-top: 2px;
+        min-height: 50px;
     }
     .table{
         display: flex;
@@ -203,6 +226,10 @@ export default {
     }
     .runstop button:hover{
         opacity: 0.8;
+    }
+    .runstop{
+        cursor: n-resize;
+        user-select: none;
     }
     .run{
         color: green;

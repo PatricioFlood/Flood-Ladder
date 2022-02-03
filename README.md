@@ -1,6 +1,6 @@
 # FloodLadder
 
-Aplicación Web: [FloodLadder.ml](https://floodladder.ml)
+Web App: [FloodLadder.ml](https://floodladder.ml)
 
 ## Description
 

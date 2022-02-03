@@ -1,6 +1,6 @@
 # FloodLadder
 
-Web App: [FloodLadder.ml](https://floodladder.ml)
+PWA: [FloodLadder.ml](https://floodladder.ml)
 
 ## Description
 

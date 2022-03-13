@@ -21,5 +21,6 @@ Ladder programming and PLC simulation project, similar to MicroWin STEP7 of the 
 
 Esto es solo un resumen, la aplicación tiene muchisimas funcionalidades útiles para el desarrollo de una simulación adecuada.
 Ya que está desarrollada para el uso en clases de Automatismo de la Escuela Técnica Nº1 Otto Krause, dejo un video de una clase regrabada donde explico el funcionamiento detallado de la misma.
-
-[![Youtube Video](readme-images/youtube-video.jpg)](https://youtu.be/KtWgIWTRIoM "Clase de Automatismo - FloodLadder")
+<div align="center">
+  <a href="https://youtu.be/KtWgIWTRIoM" title="Clase de Automatismo - FloodLadder"><img src="readme-images/youtube-video.jpg" alt="Youtube Video"></img></a>
+</div>

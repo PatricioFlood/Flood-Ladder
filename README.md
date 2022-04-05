@@ -1,6 +1,6 @@
 # FloodLadder
 
-PWA: [ladder.flood.ar](https://ladder.flood.ar)
+PWA: [https://ladder.flood.ar](https://ladder.flood.ar)
 
 ## Description
 
